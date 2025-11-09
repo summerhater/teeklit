@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'widgets/teekle_list_item.dart';
 import 'widgets/random_teekle_card.dart';
@@ -28,7 +30,7 @@ class TeekleMainScreen extends StatefulWidget {
 }
 
 class _TeekleMainScreenState extends State<TeekleMainScreen> {
-  final List<TeekleItemData> _teekle = [
+  final List<TeekleItemData> _teekles = [
     TeekleItemData(
       title: '분리수거하기',
       tag: '정리',
@@ -50,11 +52,90 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
     ),
   ];
 
-  int get _doneCount => _teekle.where((t) => t.isDone).length;
+  // 랜덤 무브 후보들
+  final List<TeekleItemData> _randomCandidates = [
+    TeekleItemData(
+      title: '밖에서 10분 산책하기',
+      tag: '운동',
+      color: Colors.greenAccent,
+      time: '8:00 AM',
+    ),
+    TeekleItemData(
+      title: '감사 일기 3줄 쓰기',
+      tag: '마음',
+      color: Colors.lightBlueAccent,
+      time: '22:00',
+    ),
+    TeekleItemData(
+      title: '물 한 컵 마시고 스트레칭 5분',
+      tag: '건강',
+      color: Colors.tealAccent,
+      time: '9:00 AM',
+    ),
+  ];
 
-  int get _totalCount => _teekle.length;
+  int get _doneCount => _teekles.where((t) => t.isDone).length;
+
+  int get _totalCount => _teekles.length;
 
   double get _progress => _totalCount == 0 ? 0 : _doneCount / _totalCount;
+
+  Future<void> _onRandomPick() async {
+    final existingTitles = _teekles.map((teekle) => teekle.title).toSet();
+    final candidates = _randomCandidates
+        .where((c) => !existingTitles.contains(c))
+        .toList();
+
+    if (candidates.isEmpty) {
+      // 더 이상 추가할 랜덤 무브 없을 때
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('추가할 랜덤 무브가 더 이상 없어요.'),
+          backgroundColor: Colors.grey[800],
+        ),
+      );
+      return;
+    }
+
+    final random = Random();
+    final selected = candidates[random.nextInt(candidates.length)];
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF252525),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('오늘의 랜덤 무브', style: TextStyle(color: Colors.white)),
+        content: Text(
+          '${selected.title}\n\n내 티클에 추가할까요?',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('아니오'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('예'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      setState(() {
+        _teekles.add(selected);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('\'${selected.title}\' 이(가) 내 티클에 추가됐어요!'),
+          backgroundColor: Colors.grey[800],
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,15 +165,7 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
                 progress: _progress,
               ),
               const SizedBox(height: 16),
-              RandomMoveCard(
-                onPick: () {
-                  final snackBar = SnackBar(
-                    content: Text("오늘의 랜덤 무브는 아침에 10분 명상하기!"),
-                    backgroundColor: Colors.grey,
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                },
-              ),
+              RandomMoveCard(onPick: _onRandomPick),
 
               const SizedBox(height: 24),
 
@@ -109,14 +182,16 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
-                    children: _teekle.map(
-                      (teekle) => MoveListItem(
-                        title: teekle.title,
-                        tag: teekle.tag,
-                        color: teekle.color,
-                        time: teekle.time,
-                      ),
-                    ).toList(),
+                    children: _teekles
+                        .map(
+                          (teekle) => MoveListItem(
+                            title: teekle.title,
+                            tag: teekle.tag,
+                            color: teekle.color,
+                            time: teekle.time,
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ),
