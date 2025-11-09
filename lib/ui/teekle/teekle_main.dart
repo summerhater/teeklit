@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/ui/teekle/widgets/move_list_item.dart';
+import 'widgets/move_list_item.dart';
+import 'widgets/random_move_card.dart';
+
+import 'widgets/progress_card.dart';
 
 class TeekleMainScreen extends StatelessWidget {
   const TeekleMainScreen({super.key});
@@ -23,12 +26,17 @@ class TeekleMainScreen extends StatelessWidget {
                       color: Colors.white)),
               const SizedBox(height: 20),
 
-              //const ProgressCard(),
+              const ProgressCard(doneCount: 2, totalCount: 4, progress: 0.5),
               const SizedBox(height: 16),
-              //const RandomMoveCard(),
-              const SizedBox(
-                height: 24,
-              ),
+              RandomMoveCard(onPick: () {
+                final snackBar = SnackBar(
+                  content: Text("오늘의 랜덤 무브는 아침에 10분 명상하기!"),
+                  backgroundColor: Colors.grey,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }),
+
+              const SizedBox(height: 24),
 
               const Text('리스트',
                   style: TextStyle(
