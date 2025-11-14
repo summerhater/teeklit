@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
-class Colors {
+class AppColors {
   // 배경
   static const Bg = Color(0xFF2C2C2E);
   static const BottomSheetBg = Color(0xFF333333);
   static const BtnDarkBg = Color(0xFF626262);
   static const ModalBg = Color.fromRGBO(0, 0, 0, 0.7);
-  static const InactiveGrayBg = Color(0xFF8C8C8C);
+  static const InactiveGreyBg = Color(0xFF8C8C8C);
   static const RoundboxDarkBg = Color(0xFF3A3A3C);
 
   // 선
-  static const StrokeGray = Color(0xFF444444);
+  static const StrokeGrey = Color(0xFF444444);
 
   // 텍스트
-  static const TxtGray = Color(0xFF6C6C6C);
+  static const TxtGrey = Color(0xFF6C6C6C);
   static const TxtLight = Color(0xFFBBBBBB);
   static const TxtDark = Color(0xFF333333);
-  static const InactiveTxtGray = Color(0xFF5F5F5F);
+  static const InactiveTxtGrey = Color(0xFF5F5F5F);
 
   // 경고
   static const WarningRed = Color(0xFFDA6C6C);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:teeklit/utils/colors.dart';
 
 class CustomInputField extends StatelessWidget {
   final String hintText; //placeholder
@@ -30,8 +31,8 @@ class CustomInputField extends StatelessWidget {
               //placeholder
               hintText: hintText,
               hintStyle: TextStyle(color: Color(0xff8C8C8C)),
-
             ),
+            cursorColor: AppColors.Green,
           ),
         )
       ],
