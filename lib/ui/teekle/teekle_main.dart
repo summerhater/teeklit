@@ -271,7 +271,7 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
                                   }
                                 },
 
-                                child: MoveListItem(
+                                child: TeekleListItem(
                                   title: teekle.title,
                                   tag: teekle.tag,
                                   color: teekle.color,
