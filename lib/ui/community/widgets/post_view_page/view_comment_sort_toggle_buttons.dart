@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:teeklit/config/colors.dart';
 
 /// 상세보기 댓글 정렬 토글 버튼
-class CommentSortToggleButtons extends StatefulWidget {
-  const CommentSortToggleButtons({super.key});
+class ViewCommentSortToggleButtons extends StatefulWidget {
+  /// 댓글 시간 순 정렬하는 버튼 TODO 댓글 정렬 기능 구현
+  const ViewCommentSortToggleButtons({super.key});
 
   @override
-  State<CommentSortToggleButtons> createState() => _CommentSortToggleButtonsState();
+  State<ViewCommentSortToggleButtons> createState() => _ViewCommentSortToggleButtonsState();
 }
 
-class _CommentSortToggleButtonsState extends State<CommentSortToggleButtons> {
+class _ViewCommentSortToggleButtonsState extends State<ViewCommentSortToggleButtons> {
   final List<String> options = ['과거순', '최신순'];
   String selected = '최신순';
 

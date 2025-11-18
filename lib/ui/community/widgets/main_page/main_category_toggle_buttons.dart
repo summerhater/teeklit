@@ -2,22 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:teeklit/config/colors.dart';
 
 /// 커뮤니티 게시판의 카테고리 토글 버튼
-class CategoryToggleButtons extends StatefulWidget {
+class MainCategoryToggleButtons extends StatefulWidget {
   final List<String> categories;
 
-  const CategoryToggleButtons({super.key, required this.categories});
+  /// 카테고리 토글 버튼을 만드는 widget
+  const MainCategoryToggleButtons({super.key, required this.categories});
 
   @override
-  State<CategoryToggleButtons> createState() => _CategoryToggleButtonsState();
+  State<MainCategoryToggleButtons> createState() => _MainCategoryToggleButtonsState();
 }
 
-class _CategoryToggleButtonsState extends State<CategoryToggleButtons> {
+class _MainCategoryToggleButtonsState extends State<MainCategoryToggleButtons> {
   late List<bool> _selected;
+
+  void updateButtonSeleccted(int i) {
+    for (int j = 0; j < _selected.length; j++) {
+      _selected[j] = j == i;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _selected = List.generate(widget.categories.length, (_) => false);
+    _selected[0] = true;
   }
 
   @override
@@ -25,43 +33,35 @@ class _CategoryToggleButtonsState extends State<CategoryToggleButtons> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double height = constraints.maxHeight;
-        final String speText = '인기';
+        final String specificText = '인기';
 
         final List<Widget> buttonList = [];
 
         for (int i = 0; i < widget.categories.length; i++) {
-          final category = widget.categories[i];
-          final isSelected = _selected[i];
+          final String category = widget.categories[i];
+          final bool isSelected = _selected[i];
 
           buttonList.add(
             Container(
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.LightGreen
+                    ? AppColors.Green
                     : AppColors.RoundboxDarkBg,
                 borderRadius: BorderRadius.circular(25),
               ),
-              // height: height * 0.6,
 
               child: ToggleButtons(
                 isSelected: [isSelected],
                 onPressed: (index) {
                   setState(() {
-                    for (int j = 0; j < _selected.length; j++) {
-                      _selected[j] = j == i;
-                    }
+                    updateButtonSeleccted(i);
                   });
                 },
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 renderBorder: false,
                 borderRadius: BorderRadius.circular(25),
-                selectedBorderColor: AppColors.RoundboxDarkBg,
-                fillColor: Colors.transparent,
-                selectedColor: AppColors.Ivory,
                 splashColor: Colors.transparent,
-                constraints: BoxConstraints(
-                  // minHeight: height*0.2, minWidth: 70
-                ),
+                constraints: BoxConstraints(),
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -71,20 +71,20 @@ class _CategoryToggleButtonsState extends State<CategoryToggleButtons> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (category == speText) ...[
+                        if (category == specificText) ...[
                           Icon(
                             Icons.local_fire_department,
                             color: AppColors.WarningRed,
-                            size: height * 0.2,
+                            size: 16,
                           ),
                           const SizedBox(width: 4),
                         ],
                         Text(
                           category,
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.TxtLight,
-                            fontSize: height * 0.2,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected ? AppColors.Ivory : AppColors.TxtLight,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -95,7 +95,7 @@ class _CategoryToggleButtonsState extends State<CategoryToggleButtons> {
             ),
           );
 
-          if (category == speText && i < widget.categories.length - 1) {
+          if (category == specificText && i < widget.categories.length - 1) {
             buttonList.add(
               Container(
                 width: 1.5,
@@ -110,6 +110,7 @@ class _CategoryToggleButtonsState extends State<CategoryToggleButtons> {
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: buttonList,
+
         );
       },
     );

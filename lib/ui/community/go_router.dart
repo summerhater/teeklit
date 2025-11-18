@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:teeklit/ui/community/community_main_page.dart';
 import 'package:teeklit/ui/community/community_post_view_page.dart';

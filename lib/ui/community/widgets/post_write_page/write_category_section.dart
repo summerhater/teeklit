@@ -5,6 +5,7 @@ import 'package:teeklit/config/colors.dart';
 class PostCategorySection extends StatefulWidget {
   final TextEditingController controller;
 
+  /// 글쓰기 페이지 카테고리 선택 부분. modal bottom sheet 호출함
   const PostCategorySection({super.key, required this.controller});
 
   @override
@@ -30,7 +31,7 @@ class _PostCategorySectionState extends State<PostCategorySection> {
         return Padding(
           padding: const EdgeInsets.all(15.0),
           child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.3,
+            height: MediaQuery.of(context).size.height*0.3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -108,7 +109,8 @@ class _PostCategorySectionState extends State<PostCategorySection> {
         hintText: '주제 선택',
         hintStyle: TextStyle(
           color: AppColors.TxtLight,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
         ),
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: AppColors.StrokeGrey),
@@ -116,7 +118,7 @@ class _PostCategorySectionState extends State<PostCategorySection> {
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: AppColors.StrokeGrey),
         ),
-        suffixIcon: Icon(Icons.arrow_forward_ios),
+        suffixIcon: Icon(Icons.chevron_right),
       ),
       onTap: _openModal,
     );
