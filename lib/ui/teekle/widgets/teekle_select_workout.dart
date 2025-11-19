@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:teeklit/ui/core/themes/colors.dart';
 
 import '../../../data/services/api/workout_api_service.dart';
-import '../../../domain/model/teekle/workout_response.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TeekleSelectWorkoutScreen extends StatefulWidget {
   const TeekleSelectWorkoutScreen({super.key});
@@ -16,12 +16,30 @@ class TeekleSelectWorkoutScreen extends StatefulWidget {
 class _TeekleSelectWorkoutScreenState extends State<TeekleSelectWorkoutScreen> {
   bool _isBookmarkMode = false;
   final WorkoutApiService _api = WorkoutApiService();
-  late Future<WorkoutResponse> _futureWorkouts;
+  final ScrollController _scrollController = ScrollController();
+  var videos = [];
+  int _currentPage = 1;
+  bool _isLoading = false;
+  bool _hasMoreData = true;
 
   @override
   void initState() {
     super.initState();
-    _futureWorkouts = _api.fetchWorkouts(page: 1, perPage: 10);
+    _scrollController.addListener(_scrollListener);
+    _loadData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      print('100 이하');
+      _loadData();
+    }
   }
 
   @override
@@ -49,116 +67,98 @@ class _TeekleSelectWorkoutScreenState extends State<TeekleSelectWorkoutScreen> {
           _buildTabBar(),
 
           Expanded(
-            child: FutureBuilder<WorkoutResponse>(
-              future: _futureWorkouts,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            child: ListView.builder(
+              controller: _scrollController,
+              shrinkWrap: true,
+              itemCount: videos.length,
+              itemBuilder: (context, index) {
+                final videoId = videos[index].videoUrl.split('/').last;
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      '데이터를 불러오는 중 오류가 발생했어요 😢\n${snapshot.error}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70),
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: AppColors.txtGray),
                     ),
-                  );
-                }
-                if (!snapshot.hasData || snapshot.data == null) {
-                  return const Center(
-                    child: Text(
-                      '표시할 데이터가 없어요',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  );
-                }
-
-                final videos = snapshot.data!.data;
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: videos.length,
-                  itemBuilder: (context, index) {
-                    final videoId = videos[index].videoUrl.split('/').last;
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: AppColors.txtGray),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16.0),
-                              child: Image.network(
-                                'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
-                                fit: BoxFit.cover,
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.0),
+                          child: Image.network(
+                            'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
+                            fit: BoxFit.cover,
+                            width: 160,
+                            height: 90,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
                                 width: 160,
                                 height: 90,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 160,
-                                    height: 90,
-                                    color: Colors.grey[800],
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.broken_image,
-                                        color: Colors.white54,
-                                        size: 32,
-                                      ),
-                                    ),
-                                  );
-                                },
+                                color: Colors.grey[800],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    color: Colors.white54,
+                                    size: 32,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 6.0),
+                              child: Text(
+                                videos[index].title,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Paperlogy',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsetsGeometry.symmetric(
-                                    vertical: 6.0,
-                                  ),
-                                  child: Text(
-                                    videos[index].title,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Paperlogy',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6.0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      launchUrl(
+                                        Uri.parse(videos[index].videoUrl),
+                                      );
+                                    },
+                                    child: SvgPicture.asset(
+                                      'assets/icons/flowbite_link-outline.svg',
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 6.0,
+                                  const SizedBox(width: 4.0),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {});
+                                    },
+                                    child: SvgPicture.asset(
+                                      'assets/icons/bookmark_uncheck.svg',
+                                    ),
                                   ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      SvgPicture.asset(
-                                        'assets/icons/flowbite_link-outline.svg',
-                                      ),
-                                      const SizedBox(width: 4.0),
-                                      SvgPicture.asset(
-                                        'assets/icons/bookmark_uncheck.svg',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 );
               },
             ),
@@ -245,5 +245,37 @@ class _TeekleSelectWorkoutScreenState extends State<TeekleSelectWorkoutScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _loadData() async {
+    if (_isLoading || !_hasMoreData) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final futureWorkouts = await _api.fetchWorkouts(
+        page: _currentPage,
+        perPage: 10,
+      );
+      if (futureWorkouts.data.isEmpty) {
+        _hasMoreData = false;
+        print('데이터 없음');
+      }
+      setState(() {
+        videos.addAll(futureWorkouts.data);
+        print('currentPage: ${_currentPage}');
+        _currentPage = _currentPage + 1;
+        print('currentPage: ${_currentPage}');
+      });
+    } catch (e) {
+      print('데이터를 불러오는 중 오류가 발생했어요 ');
+      print('${e.toString()}');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }
