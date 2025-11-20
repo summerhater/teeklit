@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:teeklit/domain/model/enums.dart';
 import 'package:teeklit/ui/teekle/widgets/teekle_setting_page.dart';
-import 'package:teeklit/ui/teekle/view_model/vm_alarm_setting.dart';
 import 'package:provider/provider.dart';
+import 'package:teeklit/ui/teekle/view_model/view_model_teekle_setting.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -22,13 +22,8 @@ class HomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                    /// 페이지를 띄울 때, 해당 페이지에서만 사용할 Provider를 함께 생성
-                    ChangeNotifierProvider(
-                      create: (_) => AlarmViewModel(),
-                      child: const TeekleSettingPage(
-                          type: TeeklePageType.addTodo),
-                    ),
+                    builder: (context) => const TeekleSettingPage(
+                        type: TeeklePageType.addTodo),
                   ),
                 );
               },

@@ -8,9 +8,9 @@ enum SettingMode { select, edit, add }
 
 Future<String?> showTeekleTagSetting(
   BuildContext context, {
-  String? currentTag,
+  String? pickedTag,
 }) async {
-  String? lastSelectedTag = currentTag;
+  String? lastSelectedTag = pickedTag;
 
   final result = await showModalBottomSheet<String>(
     context: context,
@@ -20,13 +20,13 @@ Future<String?> showTeekleTagSetting(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (_) => TagBottomSheet(
-      initialTag: currentTag,
+      initialTag: pickedTag,
       onTagChanged: (tag) {
         lastSelectedTag = tag;
       },
     ),
   );
-
+  print('selectedTag in showTeekleTagSetting : ${lastSelectedTag}');
   return result ?? lastSelectedTag;
 }
 
@@ -76,112 +76,118 @@ class _TagBottomSheetState extends State<TagBottomSheet> {
   @override
   Widget build(BuildContext context) {
     if (settingMode == SettingMode.add) {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          10,
-          20,
-          MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TeekleBottomSheetHeader(
-              title: "태그 추가하기",
-              showLeading: true,
-              onLeadingTap: () {
-                setState(() {
-                  settingMode = SettingMode.edit;
-                });
-              },
-              onClose: () => Navigator.pop(context),
-            ),
-            const SizedBox(height: 20),
-            TagAdd(
-              onAdd: (newTag) {
-                setState(() {
-                  _tags.add(newTag);
-                  settingMode = SettingMode.edit;
-                });
-              },
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.45,
-        ),
+      return PopScope(
+        canPop: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+          padding: EdgeInsets.fromLTRB(
+            20,
+            10,
+            20,
+            MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (settingMode == SettingMode.select)
-                TeekleBottomSheetHeader(
-                  title: "태그",
-                  showEdit: true,
-                  onEditTap: () {
-                    setState(() {
-                      settingMode = SettingMode.edit;
-                    });
-                  },
-                  onClose: () => Navigator.pop(context, _selectedTag),
-                )
-              else if (settingMode == SettingMode.edit)
-                TeekleBottomSheetHeader(
-                  title: "태그 편집하기",
-                  showLeading: true,
-                  onLeadingTap: () {
-                    setState(() {
-                      settingMode = SettingMode.select;
-                    });
-                  },
-                  onClose: () => Navigator.pop(context),
-                ),
+              TeekleBottomSheetHeader(
+                title: "태그 추가하기",
+                showLeading: true,
+                onLeadingTap: () {
+                  setState(() {
+                    settingMode = SettingMode.edit;
+                  });
+                },
+                onClose: () => Navigator.pop(context),
+              ),
               const SizedBox(height: 20),
-              Expanded(
-                child: Builder(
-                  builder: (context) {
-                    if (settingMode == SettingMode.select) {
-                      return TagSelect(
-                        tags: _tags, // 상태 리스트 전달
-                        scrollController: _scrollController,
-                        selectedTag: _selectedTag,
-                        showTopGradient: _showTopGradient,
-                        onTagTap: (tag) {
-                          setState(() {
-                            _selectedTag = (_selectedTag == tag) ? null : tag;
-                          });
-                          widget.onTagChanged?.call(_selectedTag);
-                        },
-                      );
-                    } else if (settingMode == SettingMode.edit) {
-                      return TagEdit(
-                        tags: _tags, // 상태 리스트 전달
-                        scrollController: _scrollController,
-                        showTopGradient: _showTopGradient,
-                        onAddPressed: () {
-                          setState(() {
-                            settingMode = SettingMode.add;
-                          });
-                        },
-                        onDelete: (tagToDelete) {
-                          setState(() {
-                            _tags.remove(tagToDelete);
-                          });
-                        },
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
+              TagAdd(
+                onAdd: (newTag) {
+                  setState(() {
+                    _tags.add(newTag);
+                    settingMode = SettingMode.edit;
+                  });
+                },
               ),
             ],
+          ),
+        ),
+      );
+    } else {
+      return PopScope(
+        canPop: false,
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.45,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (settingMode == SettingMode.select)
+                  TeekleBottomSheetHeader(
+                    title: "태그",
+                    showEdit: true,
+                    onEditTap: () {
+                      setState(() {
+                        settingMode = SettingMode.edit;
+                      });
+                    },
+                    onClose: () => Navigator.pop(context, _selectedTag),
+                  )
+                else if (settingMode == SettingMode.edit)
+                  TeekleBottomSheetHeader(
+                    title: "태그 편집하기",
+                    showLeading: true,
+                    onLeadingTap: () {
+                      setState(() {
+                        settingMode = SettingMode.select;
+                      });
+                    },
+                    onClose: () => Navigator.pop(context),
+                  ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      if (settingMode == SettingMode.select) {
+                        return TagSelect(
+                          tags: _tags, // 상태 리스트 전달
+                          scrollController: _scrollController,
+                          selectedTag: _selectedTag,
+                          showTopGradient: _showTopGradient,
+                          onTagTap: (tag) {
+                            setState(() {
+                              _selectedTag = (_selectedTag == tag) ? null : tag;
+                            });
+                            widget.onTagChanged?.call(_selectedTag);
+                          },
+                        );
+                      } else if (settingMode == SettingMode.edit) {
+                        return TagEdit(
+                          tags: _tags, // 상태 리스트 전달
+                          scrollController: _scrollController,
+                          showTopGradient: _showTopGradient,
+                          onAddPressed: () {
+                            setState(() {
+                              settingMode = SettingMode.add;
+                            });
+                          },
+                          onDelete: (tagToDelete) {
+                            setState(() {
+                              _tags.remove(tagToDelete);
+                            });
+                          },
+                        );
+                      } else {
+                        return Container();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -287,6 +293,8 @@ class TagEdit extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 10.0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Slidable(
+                ///리스트에 고유 키를 부여 -> 삭제가 되어도 다음 리스트가 삭제된 ListView 상태를 물려받지 안도록 설정
+                key: ValueKey(tag),
                 endActionPane: ActionPane(
                   motion: const ScrollMotion(),
                   extentRatio: 0.25,
@@ -364,7 +372,6 @@ class TagEdit extends StatelessWidget {
   }
 }
 
-// TagAdd를 StatefulWidget으로 변경하여 TextEditingController를 관리합니다.
 class TagAdd extends StatefulWidget {
   final ValueChanged<String> onAdd;
   const TagAdd({super.key, required this.onAdd});

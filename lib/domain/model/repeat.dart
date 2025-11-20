@@ -5,7 +5,7 @@ class Repeat {
   final bool hasRepeat;
   final RepeatUnit? unit;
   final int? interval;
-  final List<DayOfWeek>? daysOfWeek; //선택된 요일
+  final List<DayOfWeek>? daysOfWeek; ///선택된 요일
 
   Repeat({required this.hasRepeat, this.unit, this.interval, this.daysOfWeek});
 

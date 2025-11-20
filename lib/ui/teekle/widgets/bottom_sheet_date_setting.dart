@@ -16,18 +16,16 @@ Future<DateTime> showTeekleDateSetting(context, DateTime selectedDate) async {
     ),
     builder: (_) => DateBottomSheet(
       selectedDate: lastSelectedDate,
-      onTimeChanged: (t) => lastSelectedDate = t,
     ),
   );
 
-  return result ?? lastSelectedDate; /// result가 null이면 마지막 선택된 값 반환
+  return result ?? lastSelectedDate;
 }
 
 class DateBottomSheet extends StatefulWidget {
-  final ValueChanged<DateTime>? onTimeChanged;
   final DateTime? selectedDate;
 
-  const DateBottomSheet({this.onTimeChanged, this.selectedDate, super.key});
+  const DateBottomSheet({this.selectedDate, super.key});
 
   @override
   State<DateBottomSheet> createState() => _DateBottomSheetState();
@@ -49,51 +47,54 @@ class _DateBottomSheetState extends State<DateBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        10,
-        20,
-        MediaQuery.of(context).viewInsets.bottom + 40,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TeekleBottomSheetHeader(
-            title: "날짜",
-            showEdit: false,
-            onClose: () => Navigator.pop(context),
-          ),
-          const SizedBox(height: 20),
-
-          SizedBox(
-            height: 220,
-            child: CupertinoTheme(
-              data: const CupertinoThemeData(
-                textTheme: CupertinoTextThemeData(
-                  dateTimePickerTextStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
+    return PopScope(
+      /// 바텀시트 바깥 터치 시 바텀시트 close 방지
+      canPop: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          10,
+          20,
+          MediaQuery.of(context).viewInsets.bottom + 40,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TeekleBottomSheetHeader(
+              title: "날짜",
+              showEdit: false,
+              onClose: () => Navigator.pop(context, date),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 220,
+              child: CupertinoTheme(
+                data: const CupertinoThemeData(
+                  textTheme: CupertinoTextThemeData(
+                    dateTimePickerTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
                   ),
                 ),
-              ),
-              child: CupertinoDatePicker(
-                minimumYear: 2025,
-                maximumYear: 2026,
-                initialDateTime: date,
-                minimumDate: minimumDate,
-                maximumDate: maximumDate,
-                mode: CupertinoDatePickerMode.date,
-                use24hFormat: true,
-                onDateTimeChanged: (DateTime newDate) {
-                  setState(() => date = newDate.toDateOnly());
-                  widget.onTimeChanged?.call(date);
-                },
+                child: CupertinoDatePicker(
+                  minimumYear: 2025,
+                  maximumYear: 2026,
+                  initialDateTime: date,
+                  minimumDate: minimumDate,
+                  maximumDate: maximumDate,
+                  mode: CupertinoDatePickerMode.date,
+                  use24hFormat: true,
+                  onDateTimeChanged: (DateTime newDate) {
+                    // 바텀시트 내부의 상태만 임시로 업데이트합니다.
+                    setState(() => date = newDate.toDateOnly());
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
