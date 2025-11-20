@@ -8,7 +8,7 @@ class Task {
   final TaskType type;
   final String title;
   final DateTime startDate;
-  final DateTime endDate;
+  final DateTime endDate; /// 반복이 종료되는 날짜 (일회성 티클에선 startDate == endDate)
   final Repeat repeat;
   final Noti noti;
   final String? url;

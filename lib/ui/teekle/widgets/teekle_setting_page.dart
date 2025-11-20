@@ -460,7 +460,14 @@ class _TeekleSettingPage extends State<TeekleSettingPage> {
         bottomNavigationBar: Consumer<TeekleSettingViewModel>(
             builder: (context, viewModel, child) {
               return GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  if (widget.type == TeeklePageType.addTodo) {
+                    viewModel.saveTask(taskType: TaskType.todo, tag: viewModel.selectedTag);
+                    print('저장 성공. 파이어스토어 체크해보기');
+                  } else if (widget.type == TeeklePageType.addWorkout) {
+                    viewModel.saveTask(taskType: TaskType.todo, tag: viewModel.selectedTag);
+                  }
+                },
                 child: Container(
                   width: double.infinity,
                   height: 92,
