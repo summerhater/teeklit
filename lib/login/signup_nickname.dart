@@ -1,10 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:teeklit_application/ui/core/themes/colors.dart';
 import 'package:teeklit_application/ui/core/themes/app_text.dart';
-import 'signup_profile_screen.dart';
 
-class SignupNicknameScreen extends StatelessWidget {
-  const SignupNicknameScreen({super.key});
+// ⭐ info 기반 구조 통일
+import 'package:teeklit_application/login/signup_info.dart';
+
+// ⭐ 프로필 화면
+import 'package:teeklit_application/login/signup_profile_screen.dart';
+
+class SignupNicknameScreen extends StatefulWidget {
+  final SignupInfo info;   // ⭐ email + password 들어 있음
+
+  const SignupNicknameScreen({
+    super.key,
+    required this.info,
+  });
+
+  @override
+  State<SignupNicknameScreen> createState() => _SignupNicknameScreenState();
+}
+
+class _SignupNicknameScreenState extends State<SignupNicknameScreen> {
+  final TextEditingController _nicknameController = TextEditingController();
+  bool isButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nicknameController.addListener(() {
+      final text = _nicknameController.text.trim();
+      setState(() {
+        isButtonEnabled = text.isNotEmpty;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _nicknameController.dispose();
+    super.dispose();
+  }
+
+  void _onNext() {
+    final nickname = _nicknameController.text.trim();
+
+    // ⭐ info에 nickname 추가
+    final updatedInfo = widget.info.copyWith(nickname: nickname);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SignupProfileScreen(info: updatedInfo),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +68,7 @@ class SignupNicknameScreen extends StatelessWidget {
           icon: Icon(
             Icons.chevron_left,
             size: 28,
-            color: AppColors.strokeGray, // 앱 컬러
+            color: AppColors.strokeGray,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -31,7 +81,6 @@ class SignupNicknameScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 10),
 
-            /// 제목
             RichText(
               text: TextSpan(
                 children: [
@@ -59,7 +108,6 @@ class SignupNicknameScreen extends StatelessWidget {
 
             const SizedBox(height: 36),
 
-            /// 닉네임 라벨
             Text(
               "닉네임",
               style: AppText.Body1.copyWith(
@@ -71,8 +119,8 @@ class SignupNicknameScreen extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// 닉네임 입력창
             TextField(
+              controller: _nicknameController,
               style: AppText.Body1.copyWith(color: Colors.white),
               decoration: InputDecoration(
                 hintText: '닉네임을 입력해주세요.',
@@ -93,20 +141,13 @@ class SignupNicknameScreen extends StatelessWidget {
         ),
       ),
 
-      /// 🔥 하단 버튼 ======================
       bottomNavigationBar: SizedBox(
         height: 80,
         child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SignupProfileScreen(),
-              ),
-            );
-          },
+          onPressed: isButtonEnabled ? _onNext : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8C8C8C),
+            backgroundColor:
+            isButtonEnabled ? const Color(0xFFB1C39F) : const Color(0xFF8C8C8C),
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0),

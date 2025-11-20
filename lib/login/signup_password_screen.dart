@@ -1,9 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:teeklit_application/login/signup_nickname.dart';
 import 'package:teeklit_application/ui/core/themes/colors.dart';
+import 'package:teeklit_application/login/signup_info.dart';
 
-class SignupPasswordScreen extends StatelessWidget {
-  const SignupPasswordScreen({super.key});
+class SignupPasswordScreen extends StatefulWidget {
+  final SignupInfo info;   // ⭐ 이메일 포함됨
+
+  const SignupPasswordScreen({
+    super.key,
+    required this.info,
+  });
+
+  @override
+  State<SignupPasswordScreen> createState() => _SignupPasswordScreenState();
+}
+
+class _SignupPasswordScreenState extends State<SignupPasswordScreen> {
+  final TextEditingController _pwController = TextEditingController();
+  final TextEditingController _pwConfirmController = TextEditingController();
+
+  @override
+  void dispose() {
+    _pwController.dispose();
+    _pwConfirmController.dispose();
+    super.dispose();
+  }
+
+  void _onNextPressed() {
+    final pw = _pwController.text.trim();
+    final pw2 = _pwConfirmController.text.trim();
+
+    if (pw.isEmpty || pw2.isEmpty) {
+      _showMsg("비밀번호를 모두 입력해주세요.");
+      return;
+    }
+
+    if (pw.length < 6) {
+      _showMsg("비밀번호는 최소 6자 이상이어야 해요.");
+      return;
+    }
+
+    if (pw != pw2) {
+      _showMsg("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    /// ⭐ info에 password 추가
+    final updatedInfo = widget.info.copyWith(password: pw);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SignupNicknameScreen(info: updatedInfo),
+      ),
+    );
+  }
+
+  void _showMsg(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +74,7 @@ class SignupPasswordScreen extends StatelessWidget {
           icon: Icon(
             Icons.chevron_left,
             size: 28,
-            color: AppColors.strokeGray, // 앱 컬러
+            color: AppColors.strokeGray,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -27,14 +84,7 @@ class SignupPasswordScreen extends StatelessWidget {
         height: 80,
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SignupNicknameScreen(),
-              ),
-            );
-          },
+          onPressed: _onNextPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF8C8C8C),
             elevation: 0,
@@ -61,7 +111,6 @@ class SignupPasswordScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
 
-            // 상단 안내문
             const Text(
               "이메일 인증을 완료했어요.\n사용하실 비밀번호를 입력해주세요.",
               style: TextStyle(
@@ -75,12 +124,13 @@ class SignupPasswordScreen extends StatelessWidget {
 
             const SizedBox(height: 28),
 
-            // 1) 비밀번호 입력
-            _passwordField("비밀번호를 입력해주세요."),
+            _passwordField(
+              hint: "비밀번호를 입력해주세요.",
+              controller: _pwController,
+            ),
 
             const SizedBox(height: 8),
 
-            // 안내 문구
             const Text(
               "비밀번호 재입력.",
               style: TextStyle(
@@ -93,19 +143,22 @@ class SignupPasswordScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // 2) 비밀번호 재입력
-            _passwordField("비밀번호를 다시 한번 입력해주세요."),
+            _passwordField(
+              hint: "비밀번호를 다시 한번 입력해주세요.",
+              controller: _pwConfirmController,
+            ),
           ],
         ),
       ),
     );
   }
 
-  /// =============================
-  /// 공통 비밀번호 입력 박스 위젯
-  /// =============================
-  Widget _passwordField(String hint) {
+  Widget _passwordField({
+    required String hint,
+    required TextEditingController controller,
+  }) {
     return TextField(
+      controller: controller,
       obscureText: true,
       decoration: InputDecoration(
         hintText: hint,
@@ -113,7 +166,6 @@ class SignupPasswordScreen extends StatelessWidget {
           fontFamily: 'Paperlogy',
           color: Colors.white54,
           fontSize: 15,
-          fontWeight: FontWeight.w400,
         ),
         filled: true,
         fillColor: const Color(0xFF555555),
@@ -130,7 +182,6 @@ class SignupPasswordScreen extends StatelessWidget {
         fontFamily: 'Paperlogy',
         color: Colors.white,
         fontSize: 16,
-        fontWeight: FontWeight.w400,
       ),
     );
   }

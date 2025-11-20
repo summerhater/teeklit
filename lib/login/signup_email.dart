@@ -2,11 +2,60 @@ import 'package:flutter/material.dart';
 import 'package:teeklit_application/ui/core/themes/colors.dart';
 import 'package:teeklit_application/ui/core/themes/app_text.dart';
 
-// 회원가입 2단계 화면
-import 'package:teeklit_application/login/signup_email_verify_screen.dart';
+// ⭐ info 구조 사용
+import 'package:teeklit_application/login/signup_info.dart';
 
-class SignupEmailScreen extends StatelessWidget {
+// ⭐ 패스워드로 info 넘김
+import 'package:teeklit_application/login/signup_password_screen.dart';
+
+class SignupEmailScreen extends StatefulWidget {
   const SignupEmailScreen({super.key});
+
+  @override
+  State<SignupEmailScreen> createState() => _SignupEmailScreenState();
+}
+
+class _SignupEmailScreenState extends State<SignupEmailScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  bool isNextEnabled = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  bool isValidEmail(String email) {
+    final reg = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    return reg.hasMatch(email.trim());
+  }
+
+  void _checkValid(String text) {
+    setState(() {
+      isNextEnabled = isValidEmail(text);
+    });
+  }
+
+  void _goNext() {
+    final email = _emailController.text.trim();
+
+    if (!isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("이메일 형식이 올바르지 않습니다.")),
+      );
+      return;
+    }
+
+    // ⭐ SignupInfo 생성 (email만 먼저 담는다)
+    final info = SignupInfo(email: email);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SignupPasswordScreen(info: info),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,33 +64,26 @@ class SignupEmailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,// theme로 적용해야함.
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: Icon(
             Icons.chevron_left,
             size: 28,
-            color: AppColors.strokeGray, // 앱 컬러
+            color: AppColors.strokeGray,
           ),
         ),
       ),
 
-      /// 🔹 하단 버튼
       bottomNavigationBar: SizedBox(
         height: 80,
-        width: double.infinity,
         child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => SignupVerifyScreen(),
-              ),
-            );
-          },
+          onPressed: isNextEnabled ? _goNext : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8C8C8C),
+            backgroundColor: isNextEnabled
+                ? AppColors.darkGreen
+                : AppColors.txtGray,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0),
@@ -57,7 +99,6 @@ class SignupEmailScreen extends StatelessWidget {
         ),
       ),
 
-      /// 🔹 본문
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
         child: Column(
@@ -65,7 +106,6 @@ class SignupEmailScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 10),
 
-            /// 🔹 Figma 스타일 제목 (부분 Bold)
             const Text.rich(
               TextSpan(
                 children: [
@@ -84,7 +124,7 @@ class SignupEmailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Paperlogy',
                       fontSize: 22,
-                      fontWeight: FontWeight.w700, // 🔥 Bold 부분
+                      fontWeight: FontWeight.w700,
                       height: 1.7,
                       color: Colors.white,
                     ),
@@ -105,11 +145,12 @@ class SignupEmailScreen extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            /// 🔹 입력창
             TextField(
+              controller: _emailController,
+              onChanged: _checkValid,
               decoration: InputDecoration(
                 hintText: '이메일 주소 입력',
-                hintStyle: TextStyle(
+                hintStyle: const TextStyle(
                   fontFamily: 'Paperlogy',
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
@@ -118,7 +159,7 @@ class SignupEmailScreen extends StatelessWidget {
                 filled: true,
                 fillColor: const Color(0xFF555555),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(

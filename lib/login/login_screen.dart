@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit_application/login/signup_terms_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:teeklit_application/ui/core/themes/colors.dart';
+import 'package:teeklit_application/ui/core/themes/app_text.dart';
+import 'package:teeklit_application/login/signup_terms_screen.dart';
+
 import 'login_style.dart';
+import '../main.dart'; // HomePage 가져오기 위해
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,7 +16,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _passwordVisible = false; // 비밀번호 보기 토글 상태
+  bool _passwordVisible = false;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _pwController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.bg,
-
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: size.width * 0.06),
@@ -28,42 +35,37 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 132),
 
-              /// 로고
               Image.asset(
                 "assets/images/teeklit_logo.png",
                 width: 112,
                 height: 150.5,
-                fit: BoxFit.contain,
               ),
 
               const SizedBox(height: 80),
 
-              /// 이메일 입력
               _inputField(
                 hint: "이메일 주소",
                 isPassword: false,
+                controller: _emailController,
               ),
 
               const SizedBox(height: 12),
 
-              /// 비밀번호 입력 + 👁️ 아이콘
               _inputField(
                 hint: "비밀번호",
                 isPassword: true,
+                controller: _pwController,
               ),
 
               const SizedBox(height: 20),
 
-              /// 아이디/비번 찾기 + 이메일 가입
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("아이디 / 비밀번호 찾기", style: LoginStyle.captionStyle),
-
                   const SizedBox(width: 12),
                   Text("|", style: LoginStyle.captionStyle),
                   const SizedBox(width: 12),
-
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -83,7 +85,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 32),
 
-              /// 로그인 버튼
               _loginButton(),
             ],
           ),
@@ -92,14 +93,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ============================
-  // 🔹 입력 필드
-  // ============================
   Widget _inputField({
     required String hint,
     required bool isPassword,
+    required TextEditingController controller,
   }) {
     return TextField(
+      controller: controller,
       obscureText: isPassword && !_passwordVisible,
       style: LoginStyle.inputTextStyle,
       decoration: InputDecoration(
@@ -112,11 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-
-        /// 🔹 비밀번호면 suffixIcon 생성
         suffixIcon: isPassword
             ? SizedBox(
-          width: 40, // 👁 아이콘 영역 고정 → 텍스트와 충돌 방지
+          width: 40,
           child: IconButton(
             padding: EdgeInsets.zero,
             icon: Image.asset(
@@ -126,8 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 20,
               height: 20,
             ),
-
-            /// 👁 버튼 눌렀을 때 토글
             onPressed: () {
               setState(() {
                 _passwordVisible = !_passwordVisible;
@@ -140,9 +136,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ============================
-  // 🔹 로그인 버튼
-  // ============================
   Widget _loginButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -150,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
         width: double.infinity,
         height: 48,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: _onLoginPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFB1C39F),
             foregroundColor: Colors.black,
@@ -163,4 +156,54 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  // ============================================
+  // 🔥 여기만 수정됨: 이메일 인증 체크 포함 로그인 로직
+  // ============================================
+  Future<void> _onLoginPressed() async {
+    final email = _emailController.text.trim();
+    final password = _pwController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("이메일과 비밀번호를 입력하세요")),
+      );
+      return;
+    }
+
+    try {
+      // 1) 로그인 요청
+      final cred = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      // 2) 상태 갱신
+      await cred.user?.reload();
+      final user = FirebaseAuth.instance.currentUser;
+
+      // 3) 이메일 인증 여부 확인
+      if (user != null && !user.emailVerified) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("이메일 인증이 완료되지 않았습니다.")),
+        );
+
+        await FirebaseAuth.instance.signOut();
+        return;
+      }
+
+      // 4) 인증 완료 → 홈 이동
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      String message = "로그인 실패";
+
+      if (e.code == 'user-not-found') message = "존재하지 않는 계정입니다";
+      if (e.code == 'wrong-password') message = "비밀번호가 틀렸습니다";
+      if (e.code == 'invalid-email') message = "이메일 형식이 잘못되었습니다";
+      if (e.code == 'too-many-requests') message = "잠시 후 다시 시도해주세요";
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
 }
+

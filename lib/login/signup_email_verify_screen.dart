@@ -1,15 +1,96 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
-// 회원가입3. 비밀번호 입력 파트.
-import 'package:teeklit_application/login/signup_password_screen.dart';
 import 'package:teeklit_application/ui/core/themes/colors.dart';
+import 'package:teeklit_application/ui/core/themes/app_text.dart';
 
+// 🔹 인증 확인용 Firebase
+import 'package:firebase_auth/firebase_auth.dart';
 
-class SignupVerifyScreen extends StatelessWidget {
-  const SignupVerifyScreen ({super.key});
+class SignupEmailVerifyScreen extends StatefulWidget {
+  final String email;
+
+  const SignupEmailVerifyScreen({
+    super.key,
+    required this.email,
+  });
+
+  @override
+  State<SignupEmailVerifyScreen> createState() => _SignupEmailVerifyScreenState();
+}
+
+class _SignupEmailVerifyScreenState extends State<SignupEmailVerifyScreen> {
+  Timer? _timer;
+
+  /// 🔥 5초마다 인증 상태 자동 체크
+  void _startAutoCheck() {
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) return;
+
+      await user.reload();
+      final refreshedUser = FirebaseAuth.instance.currentUser;
+
+      if (refreshedUser != null && refreshedUser.emailVerified) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("이메일 인증이 완료되었습니다.")),
+        );
+
+        _timer?.cancel();
+
+        // 🔥 인증 완료 → 홈페이지 혹은 다음 화면 이동
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔥 자동 감지 시작
+    _startAutoCheck();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  /// 버튼 누를 때 수동 확인
+  Future<void> _checkEmailVerified() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("로그인 정보가 올바르지 않습니다.")),
+      );
+      return;
+    }
+
+    await user.reload();
+    final refreshedUser = FirebaseAuth.instance.currentUser;
+
+    if (refreshedUser != null && refreshedUser.emailVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("이메일 인증이 완료되었습니다.")),
+      );
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("아직 인증이 완료되지 않았습니다.")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: AppColors.bg,
 
@@ -18,39 +99,25 @@ class SignupVerifyScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(
-            Icons.chevron_left,
-            size: 28,
-            color: AppColors.strokeGray, // 앱 컬러
-          ),
+          icon: Icon(Icons.chevron_left, color: AppColors.strokeGray, size: 28),
         ),
       ),
 
-      /// 🔹 하단 버튼 (피그마 전체폭, 배경 밝은 회색)
       bottomNavigationBar: SizedBox(
         height: 80,
-        width: double.infinity,
         child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SignupPasswordScreen(),
-              ),
-            );
-          },
+          onPressed: _checkEmailVerified,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8C8C8C),
+            backgroundColor: AppColors.darkGreen,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0),
             ),
           ),
-          child: const Text(
-            "다음",
-            style: TextStyle(
+          child: Text(
+            "회원가입 완료!",
+            style: AppText.Button.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
           ),
@@ -58,53 +125,53 @@ class SignupVerifyScreen extends StatelessWidget {
       ),
 
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
-            /// 🔹 상단 제목 (부분 Bold + 줄바꿈)
-            const Text.rich(
+            const Text(
+              "본인확인을 위해 이메일로",
+              style: TextStyle(
+                fontFamily: 'Paperlogy',
+                fontWeight: FontWeight.w500,
+                fontSize: 22,
+                height: 1.6,
+                color: Colors.white,
+              ),
+            ),
+
+            Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: "본인확인을 위해 이메일로\n",
-                    style: TextStyle(
-                      fontFamily: 'Paperlogy',
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                      height: 1.7,
-                      color: Colors.white,
-                    ),
-                  ),
-                  TextSpan(
+                  const TextSpan(
                     text: "전송된 링크로 ",
                     style: TextStyle(
                       fontFamily: 'Paperlogy',
-                      fontSize: 22,
                       fontWeight: FontWeight.w500,
-                      height: 1.7,
+                      fontSize: 22,
+                      height: 1.6,
                       color: Colors.white,
                     ),
                   ),
-                  TextSpan(
+                  const TextSpan(
                     text: "인증",
                     style: TextStyle(
                       fontFamily: 'Paperlogy',
+                      fontWeight: FontWeight.w700,
                       fontSize: 22,
-                      fontWeight: FontWeight.w700, // 🔥 여기만 Bold
-                      height: 1.7,
+                      height: 1.6,
                       color: Colors.white,
                     ),
                   ),
-                  TextSpan(
+                  const TextSpan(
                     text: "을 진행해주세요.",
                     style: TextStyle(
                       fontFamily: 'Paperlogy',
-                      fontSize: 22,
                       fontWeight: FontWeight.w500,
-                      height: 1.7,
+                      fontSize: 22,
+                      height: 1.6,
                       color: Colors.white,
                     ),
                   ),
@@ -112,7 +179,31 @@ class SignupVerifyScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: size.height * 0.03),
+
+            const Text(
+              "발송된 이메일",
+              style: TextStyle(
+                fontFamily: 'Paperlogy',
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+                height: 1.5,
+                color: AppColors.txtLight,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              widget.email,
+              style: const TextStyle(
+                fontFamily: 'Paperlogy',
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                height: 1.4,
+                color: AppColors.lightGreen,
+              ),
+            ),
           ],
         ),
       ),

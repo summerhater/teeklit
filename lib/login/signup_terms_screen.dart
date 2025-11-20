@@ -15,9 +15,11 @@ class SignupTermsScreen extends StatefulWidget {
 class _SignupTermsScreenState extends State<SignupTermsScreen> {
   // 체크 상태 저장
   bool agreeAll = false;
-  bool agree1 = false;
-  bool agree2 = false;
-  bool agree3 = false;
+  bool agree1 = false; // 필수
+  bool agree2 = false; // 선택
+  bool agree3 = false; // 선택
+
+  bool get isButtonEnabled => agree1 && agree2;
 
   /// 공통 체크박스 UI
   Widget _checkItem(String text, bool checked, VoidCallback onTap) {
@@ -45,6 +47,27 @@ class _SignupTermsScreenState extends State<SignupTermsScreen> {
     );
   }
 
+  /// ===========================================
+  /// 🔹 "다음" 버튼 로직 (필수 약관 검사 후 이동)
+  /// ===========================================
+  void _onNextPressed() {
+    if (!agree1||!agree2) {
+      // 필수 약관 미체크 → 경고만 출력
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("필수 약관에 동의해야 회원가입을 진행할 수 있습니다."),
+        ),
+      );
+      return;
+    }
+
+    // 필수 체크된 경우 → 다음 화면으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SignupEmailScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,12 +79,12 @@ class _SignupTermsScreenState extends State<SignupTermsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(//todo: leading icon은 flutter default를 사용하기. 삭제.
+        leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: Icon(
             Icons.chevron_left,
             size: 28,
-            color: AppColors.strokeGray, // 앱 컬러
+            color: AppColors.strokeGray,
           ),
         ),
       ),
@@ -72,18 +95,15 @@ class _SignupTermsScreenState extends State<SignupTermsScreen> {
       bottomNavigationBar: SizedBox(
         height: 80,
         child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => SignupEmailScreen()),
-            );
-          },
+          onPressed: _onNextPressed,  // ← 함수 호출만 남김
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8C8C8C),
+            backgroundColor: isButtonEnabled
+                ? AppColors.green
+                : AppColors.txtGray,
+              elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0),
             ),
-            elevation: 0,
           ),
           child: Text(
             "다음",
@@ -121,7 +141,7 @@ class _SignupTermsScreenState extends State<SignupTermsScreen> {
                     style: AppText.H1.copyWith(
                       fontSize: 22,
                       color: Colors.white,
-                      fontWeight: FontWeight.w700, // 볼드
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   TextSpan(
@@ -145,7 +165,7 @@ class _SignupTermsScreenState extends State<SignupTermsScreen> {
             _checkItem(
               "모두 동의하기",
               agreeAll,
-                  () {//todo: 함수 따로 뽑기
+                  () {
                 setState(() {
                   agreeAll = !agreeAll;
                   agree1 = agreeAll;
@@ -157,34 +177,45 @@ class _SignupTermsScreenState extends State<SignupTermsScreen> {
 
             const SizedBox(height: 16),
 
-            // 약관1
+            // 약관1 (필수)
             _checkItem(
-              "약관 1 (필수)",
+              "서비스 이용 약관 (필수)",
               agree1,
                   () {
-                setState(() => agree1 = !agree1);
+                setState(() {
+                  agree1 = !agree1;
+
+                  // 개별 해제 → 전체동의 false
+                  if (!agree1) agreeAll = false;
+                });
               },
             ),
 
             const SizedBox(height: 12),
 
-            // 약관2
+            // 약관2 (선택)
             _checkItem(
-              "약관 2 (선택)",
+              "제3자 개인정보 처리 동의 (필수)",
               agree2,
                   () {
-                setState(() => agree2 = !agree2);
+                setState(() {
+                  agree2 = !agree2;
+                  if (!agree2) agreeAll = false;
+                });
               },
             ),
 
             const SizedBox(height: 12),
 
-            // 약관3
+            // 약관3 (선택)
             _checkItem(
-              "약관 3 (선택)",
+              "마케팅 정보 수신 동의 (선택)",
               agree3,
                   () {
-                setState(() => agree3 = !agree3);
+                setState(() {
+                  agree3 = !agree3;
+                  if (!agree3) agreeAll = false;
+                });
               },
             ),
           ],

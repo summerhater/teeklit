@@ -1,12 +1,56 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:teeklit_application/ui/core/themes/app_text.dart';
 import 'package:teeklit_application/ui/core/themes/colors.dart';
+import 'package:teeklit_application/login/auth_service.dart';
+import 'package:teeklit_application/login/signup_info.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:teeklit_application/login/signup_email_verify_screen.dart';
 
-class SignupProfileScreen extends StatelessWidget {
-  const SignupProfileScreen({super.key});
+
+//유저 프로필 저장
+import 'package:cloud_firestore/cloud_firestore.dart';
+//프로필 사진 업로드
+import 'package:firebase_storage/firebase_storage.dart';
+
+
+class SignupProfileScreen extends StatefulWidget {
+  final SignupInfo info;
+  // 로그인 정보 저장
+
+  const SignupProfileScreen({
+    super.key,
+    required this.info,
+  });
+
+  @override
+  State<SignupProfileScreen> createState() => _SignupProfileScreenState();
+}
+
+///
+/// 🔥 State 클래스: 상태(_localImagePath), setState(), build()는 여기서만 가능.
+///
+class _SignupProfileScreenState extends State<SignupProfileScreen> {
+  String? _localImagePath;
+  //  프로필 사진의 로컬 경로 저장.
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked == null) return;
+
+    setState(() {
+      _localImagePath = picked.path;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final nickname = widget.info.nickname ?? "";
+    // 👉 nickname은 widget.info에서 가져와야 함
+
     return Scaffold(
       backgroundColor: AppColors.bg,
 
@@ -17,7 +61,7 @@ class SignupProfileScreen extends StatelessWidget {
           icon: Icon(
             Icons.chevron_left,
             size: 28,
-            color: AppColors.strokeGray, // 앱 컬러
+            color: AppColors.strokeGray,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -35,7 +79,7 @@ class SignupProfileScreen extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: "반가워요, 새싹랩님!\n",
+                    text: "반가워요, $nickname님!\n",
                     style: AppText.H1.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -55,7 +99,7 @@ class SignupProfileScreen extends StatelessWidget {
                     text: "프로필 사진",
                     style: AppText.H1.copyWith(
                       fontSize: 22,
-                      fontWeight: FontWeight.w700,   // 볼드 ONLY 여기
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                       height: 1.3,
                     ),
@@ -74,47 +118,52 @@ class SignupProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 48),
 
-            /// 프로필 + 연필 아이콘
+            /// 프로필 이미지 + 연필 아이콘
             Center(
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  /// 프로필 원형 (로고 이미지만)
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF4A4A4A),
-                    ),
-                    child: ClipOval(
-                      child: FractionallySizedBox(
-                        widthFactor: 0.6,   // ← 여기 숫자만 바꾸면 비율 조절됨 (0.0 ~ 1.0)
-                        heightFactor: 0.6,  // ← 0.6 = 60% 크기(
+                  /// 프로필 원형
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 55,
+                      backgroundColor: const Color(0xFF4A4A4A),
+                      backgroundImage: _localImagePath != null
+                          ? FileImage(File(_localImagePath!))
+                          : null,
+                      child: _localImagePath == null
+                          ? FractionallySizedBox(
+                        widthFactor: 0.6,
+                        heightFactor: 0.6,
                         child: Image.asset(
-                          "assets/Images/grey_check.png",
+                          "assets/images/grey_check.png",
                           fit: BoxFit.cover,
                         ),
-                      ),
+                      )
+                          : null,
                     ),
                   ),
 
-                  /// 연필 아이콘 버튼
+                  /// 연필 아이콘
                   Positioned(
                     bottom: -2,
                     right: -2,
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFF7F5E6),
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          "assets/Images/pencil.png", // 👈 연필 아이콘
-                          width: 40,
-                          height: 40,
+                    child: GestureDetector(
+                      onTap: _pickImage, // ← 연필 눌렀을 때 갤러리 열림!
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFFF7F5E6),
+                        ),
+                        child: Center(
+                          child: Image.asset(
+                            "assets/images/pencil.png",
+                            width: 25,
+                            height: 25,
+                          ),
                         ),
                       ),
                     ),
@@ -128,10 +177,10 @@ class SignupProfileScreen extends StatelessWidget {
             /// 닉네임 표시
             Center(
               child: Text(
-                "새싹랩",
+                nickname,
                 style: AppText.Body1.copyWith(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700, // 볼드 요청사항
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
               ),
@@ -140,10 +189,79 @@ class SignupProfileScreen extends StatelessWidget {
         ),
       ),
 
+      /// 이메일 확인으로 넘기기 버튼
       bottomNavigationBar: SizedBox(
         height: 80,
         child: ElevatedButton(
-          onPressed: () {},
+            onPressed: () async {
+              final info = widget.info.copyWith(
+                profileImagePath: _localImagePath,
+              );
+
+              try {
+                // 1) Firebase Auth 계정 생성
+                final credential = await AuthService.instance.signUpWithEmail(
+                  email: info.email,
+                  password: info.password!,
+                );
+
+                final user = credential.user!;
+                String? photoUrl;
+
+                // 2) 프로필 이미지를 선택한 경우 → Firebase Storage 업로드
+                if (info.profileImagePath != null) {
+                  final file = File(info.profileImagePath!);
+
+                  final storageRef = FirebaseStorage.instance
+                      .ref()
+                      .child('users')
+                      .child(user.uid)
+                      .child('profile.jpg');
+
+                  await storageRef.putFile(file);
+                  photoUrl = await storageRef.getDownloadURL();
+                }
+
+                // 3) Firestore users/{uid}에 계정 정보 저장
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .set({
+                  'email': info.email,
+                  'nickname': info.nickname,
+                  'profileImage': photoUrl,
+                  'createdAt': FieldValue.serverTimestamp(),
+                });
+
+                // 4) 이메일 인증 메일 보내기
+                await user.sendEmailVerification();
+
+                if (!mounted) return;
+
+                // 5) UI 알림 표시
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("이메일 인증을 진행해주세요.")),
+                );
+
+                // 6) 로그인 화면으로 이동하거나 자동 로그인 처리
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SignupEmailVerifyScreen(email: info.email),
+                  ),
+                );
+
+              } on FirebaseAuthException catch (e) {
+                final msg = AuthService.instance.getErrorMessage(e);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(msg)),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("알 수 없는 오류가 발생했습니다.")),
+                );
+              }
+            },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFB1C39F),
             foregroundColor: Colors.black,
@@ -153,7 +271,7 @@ class SignupProfileScreen extends StatelessWidget {
             ),
           ),
           child: Text(
-            "가입완료하기",
+            "다음",
             style: AppText.Button.copyWith(
               fontSize: 18,
               color: Colors.black,
