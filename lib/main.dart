@@ -1,3 +1,4 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'ui/teekle/widgets/teekle_setting_test.dart';
@@ -31,6 +32,8 @@ class Teeklit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: const Locale('ko', 'KR'),
+      
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Paperlogy'),
       home: const HomePage2(),
