@@ -1,20 +1,53 @@
 // main.dart
 import 'package:flutter/material.dart';
-import 'package:teeklit/ui/teekle/widgets/teekle_select_workout.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'ui/teekle/widgets/teekle_setting_test.dart';
+import 'ui/teekle/widgets/teekle_setting_test2.dart';
 
-void main() {
-  runApp(const TeeklitApp());
+
+//파이어베이스
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();      // ← 중요
+  await Firebase.initializeApp(                   // ← 중요
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  FirebaseFirestore.instance.collection('test').get().then((snapshot) {
+    print('🔥 Firestore 연결 성공! 문서 개수: ${snapshot.docs.length}');
+  }).catchError((e) {
+    print('🔥 Firestore 연결 실패: $e');
+  });
+
+  runApp(const Teeklit());
 }
 
-class TeeklitApp extends StatelessWidget {
-  const TeeklitApp({super.key});
+class Teeklit extends StatelessWidget {
+  const Teeklit({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(scaffoldBackgroundColor: const Color(0xFF121212)),
-      home: TeekleSelectWorkoutScreen(),
+    return MaterialApp.router(
+      routerConfig: router,
+      theme: ThemeData(fontFamily: 'Paperlogy'),
+      debugShowCheckedModeBanner: false,
+      locale: const Locale('ko', 'KR'),
+      
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(fontFamily: 'Paperlogy'),
+      home: const HomePage2(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''),
+        Locale('ko', ''),
+      ]
     );
   }
 }
