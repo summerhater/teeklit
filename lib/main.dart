@@ -31,7 +31,10 @@ class Teeklit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: router,
+      theme: ThemeData(fontFamily: 'Paperlogy'),
+      debugShowCheckedModeBanner: false,
       locale: const Locale('ko', 'KR'),
       
       debugShowCheckedModeBanner: false,
@@ -44,7 +47,7 @@ class Teeklit extends StatelessWidget {
       supportedLocales: const [
         Locale('en', ''),
         Locale('ko', ''),
-      ],
+      ]
     );
   }
 }
