@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 
 /// 커뮤니티 게시판의 카테고리 토글 버튼
 class MainCategoryToggleButtons extends StatefulWidget {
@@ -45,8 +45,8 @@ class _MainCategoryToggleButtonsState extends State<MainCategoryToggleButtons> {
             Container(
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.Green
-                    : AppColors.RoundboxDarkBg,
+                    ? AppColors.green
+                    : AppColors.roundboxDarkBg,
                 borderRadius: BorderRadius.circular(25),
               ),
 
@@ -74,7 +74,7 @@ class _MainCategoryToggleButtonsState extends State<MainCategoryToggleButtons> {
                         if (category == specificText) ...[
                           Icon(
                             Icons.local_fire_department,
-                            color: AppColors.WarningRed,
+                            color: AppColors.warningRed,
                             size: 16,
                           ),
                           const SizedBox(width: 4),
@@ -83,7 +83,7 @@ class _MainCategoryToggleButtonsState extends State<MainCategoryToggleButtons> {
                           category,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? AppColors.Ivory : AppColors.TxtLight,
+                            color: isSelected ? AppColors.ivory : AppColors.txtLight,
                             fontSize: 12,
                           ),
                         ),
@@ -100,7 +100,7 @@ class _MainCategoryToggleButtonsState extends State<MainCategoryToggleButtons> {
               Container(
                 width: 1.5,
                 height: height * 0.5,
-                color: AppColors.StrokeGrey,
+                color: AppColors.strokeGray,
               ),
             );
           }

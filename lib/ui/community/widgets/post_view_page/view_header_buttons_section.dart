@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:teeklit/ui/community/view_model/community_view_model.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/post_view_page/view_bookmark_toggle_button.dart';
 
 class ViewHeaderButtonsSection extends StatelessWidget {
@@ -9,13 +11,15 @@ class ViewHeaderButtonsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<CommunityViewModel>();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TextButton(
-          onPressed: () {GoRouter.of(context).goNamed('communityMain');},
+          onPressed: () {context.goNamed('communityMain');},
           style: TextButton.styleFrom(
-            backgroundColor: AppColors.DarkGreen,
+            backgroundColor: AppColors.darkGreen,
             minimumSize: Size(0, 0),
           ),
           child: Padding(
@@ -23,9 +27,9 @@ class ViewHeaderButtonsSection extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  '자유게시판',
+                  vm.post!.category.toString(),
                   style: TextStyle(
-                    color: AppColors.Ivory,
+                    color: AppColors.ivory,
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                   ),
@@ -33,7 +37,7 @@ class ViewHeaderButtonsSection extends StatelessWidget {
                 Icon(
                   Icons.chevron_right,
                   size: 10,
-                  color: AppColors.Ivory,
+                  color: AppColors.ivory,
                 ),
               ],
             ),

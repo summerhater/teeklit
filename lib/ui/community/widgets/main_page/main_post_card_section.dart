@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:teeklit/ui/community/view_model/community_view_model.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 
 /// 게시글 리스트에 출력되는 게시글 정보들.
 ///
@@ -25,11 +27,14 @@ class PostCard extends StatelessWidget {
     final int commentCount = postInfo['commentCount'];
 
     return GestureDetector(
-      onTap: (){GoRouter.of(context).push('/community/view');},
+      onTap: (){
+        context.read<CommunityViewModel>().selectedPost('input_post_id');
+        context.go('/community/view');
+      },
       child: Container(
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColors.RoundboxDarkBg,
+          color: AppColors.roundboxDarkBg,
           borderRadius: BorderRadius.circular(12),
         ),
 
@@ -94,7 +99,7 @@ class PostTitle extends StatelessWidget {
     return Text(
       postTitle,
       style: TextStyle(
-        color: AppColors.TxtLight,
+        color: AppColors.txtLight,
         fontWeight: FontWeight.w600,
         fontSize: 14,
       ),
@@ -118,7 +123,7 @@ class PostContents extends StatelessWidget {
     return Text(
       postContents,
       style: TextStyle(
-        color: AppColors.TxtGrey,
+        color: AppColors.txtGray,
         fontSize: 13,
         fontWeight: FontWeight.w400
       ),
@@ -158,10 +163,10 @@ class CategoryBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color setColor = switch (category) {
-      '자유게시판' => AppColors.Orange,
-      '티클' => AppColors.Green,
-      '정보' => AppColors.Blue,
-      _ => AppColors.WarningRed,
+      '자유게시판' => AppColors.orange,
+      '티클' => AppColors.green,
+      '정보' => AppColors.blue,
+      _ => AppColors.warningRed,
     };
 
     return Container(
@@ -176,7 +181,7 @@ class CategoryBox extends StatelessWidget {
         category,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: AppColors.TxtGrey,
+          color: AppColors.txtGray,
           fontWeight: FontWeight.w600,
           fontSize: 10,
         ),
@@ -198,11 +203,11 @@ class CommentCount extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.forum, color: AppColors.Ivory, size: 12),
+        Icon(Icons.forum, color: AppColors.ivory, size: 12),
         Text(
           '$commentCount',
           style: TextStyle(
-            color: AppColors.TxtGrey,
+            color: AppColors.txtGray,
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),

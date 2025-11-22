@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/community_custom_buttons.dart';
 
 class ViewAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -22,7 +22,7 @@ class _ViewAppBarState extends State<ViewAppBar> {
           top: Radius.circular(25),
         ),
       ),
-      backgroundColor: AppColors.Bg,
+      backgroundColor: AppColors.bg,
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(20.0),
@@ -33,7 +33,7 @@ class _ViewAppBarState extends State<ViewAppBar> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.TxtGrey,
+                    color: AppColors.txtGray,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   margin: EdgeInsets.only(top: 5),
@@ -42,7 +42,7 @@ class _ViewAppBarState extends State<ViewAppBar> {
                     buttonText: Text(
                       '신고',
                       style: TextStyle(
-                        color: AppColors.Ivory,
+                        color: AppColors.ivory,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -52,7 +52,7 @@ class _ViewAppBarState extends State<ViewAppBar> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.TxtGrey,
+                    color: AppColors.txtGray,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   margin: EdgeInsets.only(top: 5),
@@ -61,7 +61,7 @@ class _ViewAppBarState extends State<ViewAppBar> {
                     buttonText: Text(
                       '차단',
                       style: TextStyle(
-                        color: AppColors.Ivory,
+                        color: AppColors.ivory,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -72,7 +72,7 @@ class _ViewAppBarState extends State<ViewAppBar> {
                 SizedBox(height: 15,),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.WarningRed,
+                    color: AppColors.warningRed,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   margin: EdgeInsets.only(top: 5),
@@ -81,7 +81,7 @@ class _ViewAppBarState extends State<ViewAppBar> {
                     buttonText: Text(
                       '취소',
                       style: TextStyle(
-                        color: AppColors.Ivory,
+                        color: AppColors.ivory,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -100,24 +100,24 @@ class _ViewAppBarState extends State<ViewAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.Bg,
+      backgroundColor: AppColors.bg,
       leading: IconButton(
         onPressed: () {
           GoRouter.of(context).pop();
         },
-        icon: Icon(Icons.chevron_left, color: AppColors.TxtGrey),
+        icon: Icon(Icons.chevron_left, color: AppColors.txtGray),
       ),
       actions: [
         CustomIconButton(
           buttonIcon: Icon(
             Icons.more_vert,
             size: 24,
-            color: AppColors.TxtGrey,
+            color: AppColors.txtGray,
           ),
           callback: _openModal,
         ),
       ],
-      shape: Border(bottom: BorderSide(color: AppColors.TxtLight, width: 0.5)),
+      shape: Border(bottom: BorderSide(color: AppColors.txtLight, width: 0.5)),
     );
   }
 }

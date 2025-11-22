@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 
 class ViewHeaderPostInfoSection extends StatelessWidget {
   
@@ -20,7 +20,7 @@ class ViewHeaderPostInfoSection extends StatelessWidget {
           child: Text(
             '집에서 안나가면 배달 시켜 드시나요?',
             style: TextStyle(
-              color: AppColors.TxtLight,
+              color: AppColors.txtLight,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -50,7 +50,7 @@ class ViewHeaderPostInfoSection extends StatelessWidget {
                 child: Text(
                   '관악구치킨왕',
                   style: TextStyle(
-                    color: AppColors.TxtLight,
+                    color: AppColors.txtLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                   ),
@@ -61,12 +61,12 @@ class ViewHeaderPostInfoSection extends StatelessWidget {
                   Icon(
                     Icons.access_time,
                     size: 14,
-                    color: AppColors.TxtLight,
+                    color: AppColors.txtLight,
                   ),
                   Text(
                     '2025.11.11',
                     style: TextStyle(
-                      color: AppColors.TxtLight,
+                      color: AppColors.txtLight,
                       fontSize: 10,
                       fontWeight: FontWeight.w300,
                     ),

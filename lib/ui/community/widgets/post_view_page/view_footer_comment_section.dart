@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/post_view_page/view_comment_sort_toggle_buttons.dart';
 import 'package:teeklit/ui/community/widgets/post_view_page/view_footer_comment_contents_section.dart';
 import 'package:teeklit/ui/community/widgets/post_view_page/view_footer_comment_info_section.dart';

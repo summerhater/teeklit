@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/community_custom_buttons.dart';
 
 class ViewBodyPostContentSection extends StatelessWidget {
@@ -17,7 +17,7 @@ class ViewBodyPostContentSection extends StatelessWidget {
           child: Text(
             '저는 안나간지 좀 됐는데..혼자 살아서 밥을 어떻게 해먹어야 할지 모르겠어요. 저는 안나간지 좀 됐는데..혼자 살아서 밥을 어떻게 해먹어야 할지 모르겠어요. 저는 안나간지 좀 됐는데..혼자 살아서 밥을 어떻게 해먹어야 할지 모르겠어요.\n\n저는 안나간지 좀 됐는데..혼자 살아서 밥을 어떻게 해먹어야 할지 모르겠어요.',
             style: TextStyle(
-              color: AppColors.TxtLight,
+              color: AppColors.txtLight,
               fontSize: 14,
               fontWeight: FontWeight.w300,
             ),
@@ -33,7 +33,7 @@ class ViewBodyPostContentSection extends StatelessWidget {
                 buttonText: Text(
                   '좋아요 4',
                   style: TextStyle(
-                    color: AppColors.TxtLight,
+                    color: AppColors.txtLight,
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -41,15 +41,15 @@ class ViewBodyPostContentSection extends StatelessWidget {
                 buttonIcon: Icon(
                   Icons.thumb_up_alt_outlined,
                   size: 12,
-                  color: AppColors.TxtLight,
+                  color: AppColors.txtLight,
                 ),
-                boxColor: AppColors.RoundboxDarkBg,
+                boxColor: AppColors.roundboxDarkBg,
               ),
               CustomTextIconButton(
                 buttonText: Text(
                   '댓글 3',
                   style: TextStyle(
-                    color: AppColors.TxtLight,
+                    color: AppColors.txtLight,
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -57,9 +57,9 @@ class ViewBodyPostContentSection extends StatelessWidget {
                 buttonIcon: Icon(
                   Icons.forum,
                   size: 12,
-                  color: AppColors.TxtLight,
+                  color: AppColors.txtLight,
                 ),
-                boxColor: AppColors.RoundboxDarkBg,
+                boxColor: AppColors.roundboxDarkBg,
               ),
             ],
           ),

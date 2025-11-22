@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:teeklit/ui/community/view_model/community_view_model.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/post_write_page/write_app_bar.dart';
 import 'package:teeklit/ui/community/widgets/community_custom_buttons.dart';
 import 'package:teeklit/ui/community/widgets/post_write_page/write_custom_text_form_field.dart';
@@ -46,20 +49,20 @@ class _CommunityPostWritePageState extends State<CommunityPostWritePage> {
   // TODO 서버 전송 기능 구현
   void _submitForm() {
     if (_formkey.currentState!.validate()) {
-      final title = _titleController.text;
-      final category = _categoryController;
-      final contents = _contentsController.text;
+      final postTitle = _titleController.text;
+      final category = _categoryController.text;
+      final postContents = _contentsController.text;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('게시글 작성')));
+      context.read<CommunityViewModel>().addPost(postTitle, postContents, category, _images);
+
+      context.go('/community');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.Bg,
+      backgroundColor: AppColors.bg,
       appBar: WriteAppBar(
         actions: [
           CustomTextButton(
@@ -68,7 +71,7 @@ class _CommunityPostWritePageState extends State<CommunityPostWritePage> {
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 fontSize: 14,
-                color: AppColors.Ivory,
+                color: AppColors.ivory,
               ),
             ),
             callback: _submitForm,
@@ -86,7 +89,7 @@ class _CommunityPostWritePageState extends State<CommunityPostWritePage> {
                   hintText: Text(
                     '제목',
                     style: TextStyle(
-                      color: AppColors.TxtLight,
+                      color: AppColors.txtLight,
                       fontWeight: FontWeight.w500,
                       fontSize: 16,
                     ),
@@ -103,7 +106,7 @@ class _CommunityPostWritePageState extends State<CommunityPostWritePage> {
                   hintText: Text(
                     '함께 살아가는 이야기를 들려주세요.\n오늘 내 무브는 어땠나요?',
                     style: TextStyle(
-                      color: AppColors.TxtGrey,
+                      color: AppColors.txtGray,
                       fontWeight: FontWeight.w400,
                       fontSize: 13,
                     ),

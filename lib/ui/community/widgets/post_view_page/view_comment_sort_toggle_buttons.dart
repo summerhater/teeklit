@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 
 /// 상세보기 댓글 정렬 토글 버튼
 class ViewCommentSortToggleButtons extends StatefulWidget {
@@ -25,11 +25,11 @@ class _ViewCommentSortToggleButtonsState extends State<ViewCommentSortToggleButt
           style: TextButton.styleFrom(
             minimumSize: Size(0, 0),
             backgroundColor: isSelected
-                ? AppColors.DarkGreen
-                : AppColors.RoundboxDarkBg,
+                ? AppColors.darkGreen
+                : AppColors.roundboxDarkBg,
             foregroundColor: isSelected
-                ? AppColors.Ivory
-                : AppColors.InactiveTxtGrey,
+                ? AppColors.ivory
+                : AppColors.inactiveTxtGray,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
               side: BorderSide.none,

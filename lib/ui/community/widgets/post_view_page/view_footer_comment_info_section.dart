@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/post_view_page/view_comment_sort_toggle_buttons.dart';
 
 class ViewFooterCommentInfoSection extends StatelessWidget {
@@ -14,7 +14,7 @@ class ViewFooterCommentInfoSection extends StatelessWidget {
         Text(
           '댓글 3',
           style: TextStyle(
-            color: AppColors.TxtLight,
+            color: AppColors.txtLight,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/community_custom_buttons.dart';
 
 /// 게시글 상세보기 페이지 댓글창
@@ -26,7 +26,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
           top: Radius.circular(25),
         ),
       ),
-      backgroundColor: AppColors.Bg,
+      backgroundColor: AppColors.bg,
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(20.0),
@@ -37,7 +37,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.TxtGrey,
+                    color: AppColors.txtGray,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   margin: EdgeInsets.only(top: 5),
@@ -46,7 +46,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                     buttonText: Text(
                       '신고',
                       style: TextStyle(
-                        color: AppColors.Ivory,
+                        color: AppColors.ivory,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -56,7 +56,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.TxtGrey,
+                    color: AppColors.txtGray,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   margin: EdgeInsets.only(top: 5),
@@ -65,7 +65,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                     buttonText: Text(
                       '차단',
                       style: TextStyle(
-                        color: AppColors.Ivory,
+                        color: AppColors.ivory,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -78,7 +78,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.WarningRed,
+                    color: AppColors.warningRed,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   margin: EdgeInsets.only(top: 5),
@@ -87,7 +87,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                     buttonText: Text(
                       '취소',
                       style: TextStyle(
-                        color: AppColors.Ivory,
+                        color: AppColors.ivory,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -128,7 +128,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
             child: Text(
               '관악구치킨왕',
               style: TextStyle(
-                color: AppColors.TxtLight,
+                color: AppColors.txtLight,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -140,7 +140,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
               Text(
                 '6시간전',
                 style: TextStyle(
-                  color: AppColors.InactiveTxtGrey,
+                  color: AppColors.inactiveTxtGray,
                   fontSize: 10,
                   fontWeight: FontWeight.w300,
                 ),
@@ -148,7 +148,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
               CustomIconButton(
                 buttonIcon: Icon(
                   Icons.more_vert,
-                  color: AppColors.TxtGrey,
+                  color: AppColors.txtGray,
                   size: 16,
                 ),
                 callback: _openModal,
@@ -176,7 +176,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.TxtLight,
+                  color: AppColors.txtLight,
                 ),
               ),
               Padding(
@@ -187,7 +187,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                       buttonText: Text(
                         '3',
                         style: TextStyle(
-                          color: AppColors.TxtLight,
+                          color: AppColors.txtLight,
                           fontWeight: FontWeight.w400,
                           fontSize: 10,
                         ),
@@ -195,7 +195,7 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                       buttonIcon: Icon(
                         Icons.thumb_up_alt_outlined,
                         size: 14,
-                        color: AppColors.TxtLight,
+                        color: AppColors.txtLight,
                       ),
                       callback: (){},
                     ),
@@ -207,11 +207,11 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
                         minimumSize: Size(0, 0),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: Text(
+                      child: Text( // TODO 눌렀을 때, 댓글 창 바뀌기
                         '댓글달기',
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
-                          color: AppColors.TxtLight,
+                          color: AppColors.txtLight,
                           fontSize: 10,
                         ),
                       ),
@@ -230,8 +230,8 @@ class _ViewFooterCommentContentsSectionState extends State<ViewFooterCommentCont
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: widget.isRecomment ? Color(0xff242424) : AppColors.Bg,
-        border: widget.isRecomment ? Border(top: BorderSide(color: AppColors.StrokeGrey)) : Border(bottom: BorderSide(color: AppColors.StrokeGrey))
+        color: widget.isRecomment ? Color(0xff242424) : AppColors.bg,
+        border: widget.isRecomment ? Border(top: BorderSide(color: AppColors.strokeGray)) : Border(bottom: BorderSide(color: AppColors.strokeGray))
       ),
       width: double.infinity,
       child: Column(

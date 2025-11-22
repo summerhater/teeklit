@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:teeklit/config/colors.dart';
+import 'package:teeklit/ui/core/themes/colors.dart';
 import 'package:teeklit/ui/community/widgets/community_custom_buttons.dart';
 
 /// 게시글 상세보기 페이지 하단 댓글 영역
@@ -31,16 +31,16 @@ class ViewWriteCommentSection extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 15),
               decoration: BoxDecoration(
-                color: AppColors.Bg,
+                color: AppColors.bg,
                 borderRadius: BorderRadius.circular(25),
               ),
               child: TextField(
                 maxLines: 1,
-                cursorColor: AppColors.TxtLight,
+                cursorColor: AppColors.txtLight,
                 decoration: InputDecoration(
                   hint: Text(
                     '댓글을 입력하세요...',
-                    style: TextStyle(color: AppColors.TxtLight),
+                    style: TextStyle(color: AppColors.txtLight),
                   ),
                   border: InputBorder.none,
                 ),
@@ -50,7 +50,7 @@ class ViewWriteCommentSection extends StatelessWidget {
           CustomIconButton(
             buttonIcon: Icon(
               Icons.forum,
-              color: AppColors.TxtLight,
+              color: AppColors.txtLight,
               size: 24,
             ),
             callback: () {},
