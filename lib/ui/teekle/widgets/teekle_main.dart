@@ -3,8 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:teeklit/data/repositories/repository_task.dart';
 import 'package:teeklit/data/repositories/repository_teekle.dart';
+import 'package:teeklit/domain/model/enums.dart';
 import 'package:teeklit/domain/model/teekle.dart';
+import 'package:teeklit/ui/teekle/widgets/teekle_setting_page.dart';
 import '../../core/themes/colors.dart';
 import 'teekle_list_item.dart';
 import 'random_teekle_card.dart';
@@ -19,32 +22,51 @@ class TeekleMainScreen extends StatefulWidget {
 }
 
 class _TeekleMainScreenState extends State<TeekleMainScreen> {
-  final TeekleRepository _repository = TeekleRepository();
+  final TaskRepository _taskRepository = TaskRepository();
+  final TeekleRepository _teekleRepository = TeekleRepository();
 
-  List<Teekle> _teeklesForDay = [];
+  // 한 달치 데이터를 날짜별로 모아두는 맵
+  final Map<DateTime, List<Teekle>> _teeklesByDay = {};
   bool _isLoading = false;
   String? _errorMessage;
+
+  List<Teekle> _teeklesForDay = []; //선택된 날의 티클
 
   // 랜덤 무브 후보들
   List<Teekle> _randomCandidates = [];
   bool _isRandomLoading = false;
   String? _randomErrorMessage;
 
-  Future<void> _loadTeeklesForDay(DateTime day) async {
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  void _refreshSelectedDayFromMap() {
+    final key = _normalizeDate(selectedDay);
+    _teeklesForDay = _teeklesByDay[key] ?? [];
+  }
+
+  Future<void> _loadTeeklesForMonth(DateTime month) async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final teekles = await _repository.getTeeklesByDate(day);
-      setState(() {
-        _teeklesForDay = teekles;
-      });
+      final teekles = await _teekleRepository.getTeeklesForMonth(month);
+
+      // 날짜별로 그룹핑
+      _teeklesByDay.clear();
+      for (final t in teekles) {
+        final dayKey = _normalizeDate(t.execDate);
+        _teeklesByDay.putIfAbsent(dayKey, () => []);
+        _teeklesByDay[dayKey]!.add(t);
+      }
+
+      // 현재 선택된 날짜의 리스트 갱신
+      _refreshSelectedDayFromMap();
     } catch (e) {
-      setState(() {
-        _errorMessage = '티클 불러오기 실패: $e';
-      });
+      _errorMessage = '티클 불러오기 실패: $e';
     } finally {
       setState(() {
         _isLoading = false;
@@ -52,13 +74,14 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
     }
   }
 
+
   Future<void> _loadRandomCandidates() async {
     setState(() {
       _isRandomLoading = true;
       _randomErrorMessage = null;
     });
     try {
-      final candidates = await _repository.getRandomTeekleCandidates();
+      final candidates = await _teekleRepository.getRandomTeekleCandidates();
       setState(() {
         _randomCandidates = candidates;
       });
@@ -131,7 +154,8 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
             child: const Text('아니오'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true), child: const Text('예'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('예'),
           ),
         ],
       ),
@@ -152,10 +176,13 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
     );
 
     try {
-      await _repository.createTeekle(newTeekle);
+      await _teekleRepository.createTeekle(newTeekle);
+      final key = _normalizeDate(selectedDay);
 
       setState(() {
-        _teeklesForDay.add(newTeekle);
+        _teeklesByDay.putIfAbsent(key, () => []);
+        _teeklesByDay[key]!.add(newTeekle);
+        _teeklesForDay = _teeklesByDay[key]!;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -175,10 +202,10 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
   }
 
   List<Teekle> _eventLoader(DateTime day) {
-    if (isSameDay(day, selectedDay)) {
-      return teeklesForDay;
-    }
-    return [];
+    final key = _normalizeDate(day);
+    final list = _teeklesByDay[key] ?? [];
+
+    return list.where((t) => !t.isDone).toList();
   }
 
   final List<Color> teekleColors = [
@@ -204,24 +231,36 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
     });
   }
 
-  void _onAddTodo() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('내 투두 추가 눌림 (추후 화면 이동 예정)'),
-        backgroundColor: Colors.grey[800],
+  void _onAddTodo() async {
+    _toggleFabMenu();
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const TeekleSettingPage(type: TeeklePageType.addTodo),
       ),
     );
-    _toggleFabMenu();
+
+    if (result == true) {
+      _loadTeeklesForMonth(selectedDay);
+    }
   }
 
-  void _onAddExercise() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('내 운동 추가 눌림 (추후 화면 이동 예정)'),
-        backgroundColor: Colors.grey[800],
+  void _onAddExercise() async {
+    _toggleFabMenu();
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const TeekleSettingPage(
+          type: TeeklePageType.addWorkout,
+        ),
       ),
     );
-    _toggleFabMenu();
+
+    if (result == true) {
+      _loadTeeklesForMonth(selectedDay);
+    }
   }
 
   void _shareTeekle(Teekle teekle) {
@@ -252,7 +291,7 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTeeklesForDay(selectedDay);
+    _loadTeeklesForMonth(selectedDay);
     _loadRandomCandidates();
   }
 
@@ -274,7 +313,8 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
       ),
       body: Stack(
         children: [
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -335,8 +375,8 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
                     TableCalendar(
                       locale: 'ko_KR',
                       firstDay: DateTime.utc(2010, 10, 16),
-                      lastDay: DateTime.utc(2030, 3, 14),
-                      focusedDay: DateTime.now(),
+                      lastDay: DateTime.utc(2035, 3, 14),
+                      focusedDay: focusedDay,
                       availableGestures: AvailableGestures.horizontalSwipe,
 
                       headerStyle: HeaderStyle(
@@ -423,11 +463,19 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
                           this.selectedDay = selectedDay;
                           this.focusedDay = focusedDay;
                         });
-                        _loadTeeklesForDay(selectedDay);
+                        final key = _normalizeDate(selectedDay);
+                        _teeklesForDay = _teeklesByDay[key] ?? [];
                       },
                       selectedDayPredicate: (day) {
                         return isSameDay(selectedDay, day);
                       },
+
+                      onPageChanged: (newFocusedDay) {
+                        setState(() {
+                          focusedDay = newFocusedDay;
+                        });
+                        _loadTeeklesForMonth(newFocusedDay);
+                      }
                     ),
 
                   teeklesForDayNotDone.isEmpty
@@ -461,64 +509,87 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
                           itemBuilder: (context, index) {
                             final teekle = teeklesForDayNotDone[index];
 
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Dismissible(
-                                key: ValueKey(teekle.title),
-                                direction: DismissDirection.horizontal,
+                            return GestureDetector(
+                              onTap: () async {
+                                final task = await _taskRepository.getTask(teekle.taskId);
 
-                                background: Container(
-                                  //좌 -> 우
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 16,
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TeekleSettingPage(
+                                      type: teekle.type == TaskType.todo
+                                          ? TeeklePageType.editTodo
+                                          : TeeklePageType.editWorkout,
+                                      teekleToEdit: teekle,
+                                      originalTask: task,
+                                    ),
                                   ),
-                                  alignment: Alignment.centerLeft,
-                                  color: AppColors.bg,
-                                  child: const Row(
-                                    children: [
-                                      Icon(Icons.reply, color: Colors.white),
-                                    ],
+                                );
+
+                                if (result == true) {
+                                  _loadTeeklesForMonth(selectedDay);
+                                }
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Dismissible(
+                                  key: ValueKey(teekle.title),
+                                  direction: DismissDirection.horizontal,
+
+                                  background: Container(
+                                    //좌 -> 우
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 16,
+                                    ),
+                                    alignment: Alignment.centerLeft,
+                                    color: AppColors.bg,
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.reply, color: Colors.white),
+                                      ],
+                                    ),
                                   ),
-                                ),
 
-                                secondaryBackground: Container(
-                                  //우 -> 좌
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
+                                  secondaryBackground: Container(
+                                    //우 -> 좌
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    alignment: Alignment.centerLeft,
+                                    color: AppColors.bg,
+                                    child: const Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Icon(Icons.check, color: Colors.white),
+                                      ],
+                                    ),
                                   ),
-                                  alignment: Alignment.centerLeft,
-                                  color: AppColors.bg,
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Icon(Icons.check, color: Colors.white),
-                                    ],
+
+                                  confirmDismiss: (direction) async {
+                                    if (direction ==
+                                        DismissDirection.startToEnd) {
+                                      _shareTeekle(teekle);
+                                    } else if (direction ==
+                                        DismissDirection.endToStart) {
+                                      setState(() {
+                                        teekle.isDone = true;
+                                        _refreshSelectedDayFromMap();
+                                      });
+                                      _teekleRepository.updateTeekle(teekle);
+                                    }
+                                  },
+
+                                  child: TeekleListItem(
+                                    title: teekle.title,
+                                    tag: teekle.tag,
+                                    color:
+                                        teekleColors[index %
+                                            teekleColors.length],
+                                    time: teekle.noti.hasNoti == false
+                                        ? null
+                                        : '${teekle.noti.notiTime?.hour.toString().padLeft(2, '0')}:${teekle.noti.notiTime?.minute.toString().padLeft(2, '0')}',
                                   ),
-                                ),
-
-                                confirmDismiss: (direction) async {
-                                  if (direction ==
-                                      DismissDirection.startToEnd) {
-                                    _shareTeekle(teekle);
-                                  } else if (direction ==
-                                      DismissDirection.endToStart) {
-                                    setState(() {
-                                      teekle.isDone = true;
-                                    });
-                                    _repository.updateTeekle(teekle);
-
-                                  }
-                                },
-
-                                child: TeekleListItem(
-                                  title: teekle.title,
-                                  tag: teekle.tag == null ? '' : teekle.tag!,
-                                  color:
-                                      teekleColors[index % teekleColors.length],
-                                  time: teekle.noti.hasNoti == false
-                                      ? null
-                                      : '${teekle.noti.notiTime?.hour.toString().padLeft(2, '0')}:${teekle.noti.notiTime?.minute.toString().padLeft(2, '0')}',
                                 ),
                               ),
                             );
@@ -623,7 +694,9 @@ class _FabMenuItem extends StatelessWidget {
               color: bubbleColor,
               shape: BoxShape.circle,
             ),
-            child: Center(child: icon,),
+            child: Center(
+              child: icon,
+            ),
           ),
         ],
       ),
