@@ -326,68 +326,68 @@ class _TeekleSettingPage extends State<TeekleSettingPage> {
                             const Divider(color: Color(0xff2C2C2E), height: 1),
 
                             /// 알림 (토글)
-                            ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 0,
-                              ),
-                              title: const Text(
-                                '알림',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (viewModel.hasAlarm)
-                                    GestureDetector(
-                                      onTap: () {
-                                        /// 이름 텍스트필드에 포커스가 있으면 실행 안 함
-                                        if (_titleFocusNode.hasFocus) {
-                                          return;
-                                        }
-                                        _handleAlarmTime(viewModel);
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade700,
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          DateFormat(
-                                            'h:mm a',
-                                          ).format(viewModel.selectedTime),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  const SizedBox(width: 8),
-                                  Switch.adaptive(
-                                    value: viewModel.hasAlarm,
-                                    onChanged: (value) {
-                                      /// 텍스트필드에 포커스가 있으면 실행 안 함
-                                      if (_titleFocusNode.hasFocus) return;
-                                      _handleAlarmToggle(value, viewModel);
-                                    },
-                                    activeThumbColor: Colors.white,
-                                    activeTrackColor: const Color(0xffB1C39F),
-                                    inactiveThumbColor: Colors.white,
-                                    inactiveTrackColor: Colors.grey.shade700,
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // ListTile(
+                            //   contentPadding: const EdgeInsets.symmetric(
+                            //     horizontal: 16,
+                            //     vertical: 0,
+                            //   ),
+                            //   title: const Text(
+                            //     '알림',
+                            //     style: TextStyle(
+                            //       color: Colors.white,
+                            //       fontWeight: FontWeight.w500,
+                            //     ),
+                            //   ),
+                            //   trailing: Row(
+                            //     mainAxisSize: MainAxisSize.min,
+                            //     children: [
+                            //       if (viewModel.hasAlarm)
+                            //         GestureDetector(
+                            //           onTap: () {
+                            //             /// 이름 텍스트필드에 포커스가 있으면 실행 안 함
+                            //             if (_titleFocusNode.hasFocus) {
+                            //               return;
+                            //             }
+                            //             _handleAlarmTime(viewModel);
+                            //           },
+                            //           child: Container(
+                            //             padding: const EdgeInsets.symmetric(
+                            //               horizontal: 12,
+                            //               vertical: 6,
+                            //             ),
+                            //             decoration: BoxDecoration(
+                            //               color: Colors.grey.shade700,
+                            //               borderRadius: BorderRadius.circular(
+                            //                 20,
+                            //               ),
+                            //             ),
+                            //             child: Text(
+                            //               DateFormat(
+                            //                 'h:mm a',
+                            //               ).format(viewModel.selectedTime),
+                            //               style: const TextStyle(
+                            //                 color: Colors.white,
+                            //                 fontWeight: FontWeight.w500,
+                            //               ),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       const SizedBox(width: 8),
+                            //       Switch.adaptive(
+                            //         value: viewModel.hasAlarm,
+                            //         onChanged: (value) {
+                            //           /// 텍스트필드에 포커스가 있으면 실행 안 함
+                            //           if (_titleFocusNode.hasFocus) return;
+                            //           _handleAlarmToggle(value, viewModel);
+                            //         },
+                            //         activeThumbColor: Colors.white,
+                            //         activeTrackColor: const Color(0xffB1C39F),
+                            //         inactiveThumbColor: Colors.white,
+                            //         inactiveTrackColor: Colors.grey.shade700,
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
 
                             const Divider(color: Color(0xff2C2C2E), height: 1),
 

@@ -80,7 +80,7 @@ class Posts {
       'userId': userId,
       'comment': comment,
       'postView': postView,
-      'isBlocked': false,
+      'isHided': false,
     };
   }
 }

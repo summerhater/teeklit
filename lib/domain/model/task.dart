@@ -15,6 +15,7 @@ class Task {
   final String userId;
 
   Task({
+    required this.userId,
     required this.taskId,
     required this.type,
     required this.title,
@@ -23,11 +24,11 @@ class Task {
     required this.repeat,
     required this.noti,
     this.url,
-    required this.userId,
   });
 
   Map<String, dynamic> toMap() {
     return {
+      'userId' : userId,
       'taskId' : taskId,
       'type' : type.name,
       'title' : title,
@@ -36,12 +37,12 @@ class Task {
       'repeat' : repeat.toMap(),
       'noti' : noti.toMap(),
       'url' : url,
-      'userId' : userId,
     };
   }
 
   factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
+      userId : map['userId'],
       taskId: map['taskId'],
       type : TaskType.values.firstWhere((e) => e.name == map['type']),
       title : map['title'],
@@ -50,7 +51,6 @@ class Task {
       repeat: Repeat.fromMap(map['repeat']),
       noti: Noti.fromMap(map['noti']),
       url : map['url'],
-      userId : map['userId'],
     );
   }
 }
