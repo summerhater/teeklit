@@ -195,7 +195,6 @@ class TeekleSettingViewModel extends ChangeNotifier {
           notiTime: _hasAlarm ? _selectedAlarmTime : null,
         ),
         url: url,
-        userId: 'test2',
       );
 
       /// Task를 Repository를 통해 DB에 저장
