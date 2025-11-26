@@ -111,6 +111,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // 티클 완료 상태 토글
       final updatedTeekle = Teekle(
+        userId: teekle.userId,
         teekleId: teekle.teekleId,
         taskId: teekle.taskId,
         type: teekle.type,

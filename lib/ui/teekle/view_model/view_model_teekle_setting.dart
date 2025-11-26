@@ -7,6 +7,7 @@ import 'package:teeklit/domain/model/task.dart';
 import 'package:teeklit/domain/model/teekle.dart';
 import 'package:teeklit/data/repositories/repository_task.dart';
 import 'package:teeklit/data/repositories/repository_teekle.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// 내 티클 관련 상태관리 및 비즈니스 로직까지 한번에 처리.
 /// 순서 : Task 생성 → 반복 패턴 계산 → Teekle 자동 생성 → DB 저장
@@ -50,6 +51,8 @@ class TeekleSettingViewModel extends ChangeNotifier {
       _selectedTag = null;
 
   ///================== 읽기 전용 : getter ==================
+  String get _userId => FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+
   /// 투두/운동 이름 getter
   String get title => _title;
 
@@ -164,6 +167,7 @@ class TeekleSettingViewModel extends ChangeNotifier {
 
       /// Task 객체 생성
       Task task = Task(
+        userId: _userId,
         taskId: uuid.v4(),
         type: taskType,
         title: _title,
@@ -180,7 +184,6 @@ class TeekleSettingViewModel extends ChangeNotifier {
           notiTime: _hasAlarm ? _selectedAlarmTime : null,
         ),
         url: null,
-        userId: 'test2',
       );
 
       /// Task를 Repository를 통해 DB에 저장
@@ -211,9 +214,10 @@ class TeekleSettingViewModel extends ChangeNotifier {
 
     // 반복이 없는 경우
     if (!task.repeat.hasRepeat) {
-      print('here1');
+      // print('here1');
       teekles.add(
         Teekle(
+          userId: task.userId,
           teekleId: uuid.v4(),
           taskId: task.taskId,
           type: task.type,
@@ -245,6 +249,7 @@ class TeekleSettingViewModel extends ChangeNotifier {
     for (DateTime execDate in execDates) {
       teekles.add(
         Teekle(
+          userId: task.userId,
           teekleId: uuid.v4(),
           taskId: task.taskId,
           type: task.type,
@@ -458,7 +463,9 @@ class TeekleSettingViewModel extends ChangeNotifier {
         taskId: uuid.v4(),
         type: originalTask.type,
         title: _title,
-        startDate: _selectedDate, /// 실행 날짜를 새로운 시작일로
+        startDate: _selectedDate,
+
+        /// 실행 날짜를 새로운 시작일로
         endDate: endDate,
         repeat: Repeat(
           hasRepeat: _hasRepeat,
@@ -493,7 +500,6 @@ class TeekleSettingViewModel extends ChangeNotifier {
 
       notifyListeners();
       return true;
-
     } catch (e) {
       print('Task 수정 실패: $e');
       notifyListeners();
@@ -538,8 +544,11 @@ class TeekleSettingViewModel extends ChangeNotifier {
     print('alarmChanged: $alarmChanged');
     print('  hasAlarm: $_hasAlarm vs ${originalTask.noti.hasNoti}');
     if (_hasAlarm && originalTask.noti.hasNoti) {
-      print('  selectedAlarmTime: $_selectedAlarmTime vs ${originalTask.noti.notiTime}');
-    };
+      print(
+        '  selectedAlarmTime: $_selectedAlarmTime vs ${originalTask.noti.notiTime}',
+      );
+    }
+    ;
 
     return titleChanged || repeatChanged || alarmChanged;
   }

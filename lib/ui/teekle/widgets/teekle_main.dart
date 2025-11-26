@@ -8,6 +8,7 @@ import 'package:teeklit/data/repositories/repository_task.dart';
 import 'package:teeklit/data/repositories/repository_teekle.dart';
 import 'package:teeklit/domain/model/enums.dart';
 import 'package:teeklit/domain/model/teekle.dart';
+import 'package:teeklit/domain/model/task.dart';
 import 'package:teeklit/ui/teekle/providers/teekle_stats_provider.dart';
 import 'package:teeklit/ui/teekle/widgets/teekle_setting_page.dart';
 import '../../core/themes/colors.dart';
@@ -15,6 +16,9 @@ import 'teekle_list_item.dart';
 import 'random_teekle_card.dart';
 
 import 'progress_card.dart';
+import 'package:teeklit/ui/teekle/view_model/view_model_teekle_setting.dart';
+import 'package:go_router/go_router.dart';
+
 
 class TeekleMainScreen extends StatefulWidget {
   const TeekleMainScreen({super.key});
@@ -35,9 +39,12 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
   List<Teekle> _teeklesForDay = []; //선택된 날의 티클
 
   // 랜덤 무브 후보들
-  List<Teekle> _randomCandidates = [];
+  List<Task> _randomCandidates = [];
   bool _isRandomLoading = false;
   String? _randomErrorMessage;
+
+  // 랜덤티클 생성을 위한 뷰모델 선언
+  late TeekleSettingViewModel _viewModel;
 
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
@@ -118,11 +125,23 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
       _randomErrorMessage = null;
     });
     try {
-      final candidates = await _teekleRepository.getRandomTeekleCandidates();
+      final candidates = await _teekleRepository.getRandomTaskCandidates();  // ✏️ 메서드명 변경
+
+      print('=== 로드된 랜덤 Task 후보 ===');
+      for (var i = 0; i < candidates.length; i++) {
+        final c = candidates[i];
+        print('[$i]');
+        print('  title: ${c.title}');
+        print('  type: ${c.type}');
+        print('  taskId: ${c.taskId}');
+        print('---');
+      }
+
       setState(() {
         _randomCandidates = candidates;
       });
     } catch (e) {
+      print('❌ 랜덤 Task 후보 로드 오류: $e');
       setState(() {
         _randomErrorMessage = '랜덤 후보 불러오기 실패: $e';
       });
@@ -133,110 +152,216 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
     }
   }
 
+  // Future<void> _onRandomPick() async {
+  //   if (_isRandomLoading) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: const Text('랜덤 무브를 불러오는 중이에요. 잠시만요!'),
+  //         backgroundColor: Colors.grey[800],
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   if (_randomCandidates.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: const Text('등록된 랜덤 무브 후보가 없어요.'),
+  //         backgroundColor: Colors.grey[800],
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   // 1. 오늘 날짜에 이미 있는 제목들은 제외 (중복 방지)
+  //   final existingTitles = _teeklesForDay.map((t) => t.title).toSet();
+  //   final candidates = _randomCandidates
+  //       .where((c) => !existingTitles.contains(c.title))
+  //       .toList();
+  //
+  //   if (candidates.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: const Text('추가할 랜덤 무브가 더 이상 없어요.'),
+  //         backgroundColor: Colors.grey[800],
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   // 2. 랜덤으로 하나 고르기
+  //   final random = Random();
+  //   final template = candidates[random.nextInt(candidates.length)];
+  //
+  //   // 3. 다이얼로그로 사용자 확인
+  //   final result = await showDialog<bool>(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       backgroundColor: const Color(0xFF252525),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //       title: const Text('오늘의 랜덤 무브', style: TextStyle(color: Colors.white)),
+  //       content: Text(
+  //         '${template.title}\n\n내 티클에 추가할까요?',
+  //         style: const TextStyle(color: Colors.white70),
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.of(context).pop(false),
+  //           child: const Text('아니오'),
+  //         ),
+  //         TextButton(
+  //           onPressed: () => Navigator.of(context).pop(true),
+  //           child: const Text('예'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  //
+  //   if (result != true) return;
+  //
+  //   // 4. 실제 저장할 랜덤 Teekle 객체 만들기 (오늘 날짜 + 새 ID)
+  //
+  //
+  //   try {
+  //     await _teekleRepository.createTeekle(newTeekle);
+  //     final key = _normalizeDate(selectedDay);
+  //
+  //     setState(() {
+  //       _teeklesByDay.putIfAbsent(key, () => []);
+  //       _teeklesByDay[key]!.add(newTeekle);
+  //       _teeklesForDay = _teeklesByDay[key]!;
+  //     });
+  //
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('\'${newTeekle.title}\' 이(가) 내 티클에 추가됐어요!'),
+  //         backgroundColor: Colors.grey[800],
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('랜덤 티클 추가 실패: $e'),
+  //         backgroundColor: Colors.red[700],
+  //       ),
+  //     );
+  //   }
+  // }
   Future<void> _onRandomPick() async {
     if (_isRandomLoading) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('랜덤 무브를 불러오는 중이에요. 잠시만요!'),
-          backgroundColor: Colors.grey[800],
-        ),
-      );
-      return;
-    }
+          SnackBar(
+            content: const Text('랜덤 티클을 불러오는 중이에요. 잠시만요!'),
+            backgroundColor: Colors.grey[800],
+            ),
+          );
+          return;
+      }
 
-    if (_randomCandidates.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('등록된 랜덤 무브 후보가 없어요.'),
-          backgroundColor: Colors.grey[800],
-        ),
-      );
-      return;
-    }
+          if (_randomCandidates.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('등록된 랜덤 티클 후보가 없어요.'),
+            backgroundColor: Colors.grey[800],
+          ),
+        );
+        return;
+      }
 
     // 1. 오늘 날짜에 이미 있는 제목들은 제외 (중복 방지)
-    final existingTitles = _teeklesForDay.map((t) => t.title).toSet();
-    final candidates = _randomCandidates
-        .where((c) => !existingTitles.contains(c.title))
-        .toList();
+      final existingTitles = _teeklesForDay.map((t) => t.title).toSet();
+      final candidates = _randomCandidates
+          .where((c) => !existingTitles.contains(c.title))
+          .toList();
 
-    if (candidates.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('추가할 랜덤 무브가 더 이상 없어요.'),
-          backgroundColor: Colors.grey[800],
-        ),
-      );
-      return;
-    }
+      if (candidates.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('추가할 랜덤 티클이 더 이상 없어요.'),
+            backgroundColor: Colors.grey[800],
+          ),
+        );
+        return;
+      }
 
     // 2. 랜덤으로 하나 고르기
-    final random = Random();
-    final template = candidates[random.nextInt(candidates.length)];
+      final random = Random();
+      final template = candidates[random.nextInt(candidates.length)];
 
     // 3. 다이얼로그로 사용자 확인
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF252525),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('오늘의 랜덤 무브', style: TextStyle(color: Colors.white)),
-        content: Text(
-          '${template.title}\n\n내 티클에 추가할까요?',
-          style: const TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('아니오'),
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: const Color(0xFF252525),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('오늘의 랜덤 무브', style: TextStyle(color: Colors.white)),
+          content: Text(
+            '${template.title}\n\n내 티클에 추가할까요?',
+            style: const TextStyle(color: Colors.white70),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('예'),
-          ),
-        ],
-      ),
-    );
-
-    if (result != true) return;
-
-    // 4. 실제 저장할 Teekle 객체 만들기 (오늘 날짜 + 새 ID)
-    final newTeekle = Teekle(
-      taskId: template.taskId,
-      teekleId: DateTime.now().millisecondsSinceEpoch.toString(),
-      type: template.type,
-      execDate: selectedDay,
-      title: template.title,
-      tag: template.tag,
-      isDone: false,
-      noti: template.noti,
-    );
-
-    try {
-      await _teekleRepository.createTeekle(newTeekle);
-      final key = _normalizeDate(selectedDay);
-
-      setState(() {
-        _teeklesByDay.putIfAbsent(key, () => []);
-        _teeklesByDay[key]!.add(newTeekle);
-        _teeklesForDay = _teeklesByDay[key]!;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('\'${newTeekle.title}\' 이(가) 내 티클에 추가됐어요!'),
-          backgroundColor: Colors.grey[800],
+          actions: [
+            TextButton(
+              onPressed: () => context.pop(false), // <-- go_router의 pop 사용
+              child: const Text('아니오'),
+            ),
+            TextButton(
+              onPressed: () => context.pop(true),   // <-- go_router의 pop 사용
+              child: const Text('예'),
+            ),
+          ],
         ),
       );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('랜덤 티클 추가 실패: $e'),
-          backgroundColor: Colors.red[700],
-        ),
-      );
+
+      if (result != true) return;
+
+      // 4. 실제 저장할 랜덤 Teekle 객체 만들기 (오늘 날짜 + 새 ID)
+      try {
+        // ✏️ 변경 부분 1: template 객체의 필드 검증
+        if (template.title == null || template.title!.isEmpty) {
+          throw Exception('템플릿의 제목이 비어있습니다.');
+        }
+
+        _viewModel.setTitle(template.title);
+        _viewModel.setDate(selectedDay);
+
+        // ✏️ 변경 부분 2: 기본값 설정
+        final taskType = template.type ?? TaskType.todo;
+        final tag = null;
+
+        bool success = await _viewModel.saveTask(
+          taskType: taskType,
+          tag: tag,
+        );
+
+        if (success && mounted) {
+          // ✏️ 변경 부분 3: 새로고침 전에 약간의 지연 추가
+          await Future.delayed(const Duration(milliseconds: 500));
+          await _loadTeeklesForMonth(selectedDay);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('\'${template.title}\' 이(가) 내 티클에 추가되었어요!'),
+              backgroundColor: Colors.grey[800],
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('랜덤 티클 추가 실패'),
+              backgroundColor: Colors.red[700],
+            ),
+          );
+        }
+      } catch (e) {
+        print('로직 오류: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('랜덤 티클 추가 실패: ${e.toString()}'),
+            backgroundColor: Colors.red[700],
+          ),
+        );
+      }
     }
-  }
 
   List<Teekle> _eventLoader(DateTime day) {
     final key = _normalizeDate(day);
@@ -330,6 +455,7 @@ class _TeekleMainScreenState extends State<TeekleMainScreen> {
     super.initState();
     _loadTeeklesForMonth(selectedDay);
     _loadRandomCandidates();
+    _viewModel = TeekleSettingViewModel();
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:teeklit/domain/model/teekle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:teeklit/domain/model/task.dart';
 
 class TeekleRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -48,6 +49,22 @@ class TeekleRepository {
           .toList();
     } catch (e) {
       throw Exception('Teekle 목록 조회 실패: $e');
+    }
+  }
+
+  /// userId로 Teekle 리스트 조회
+  Future<List<Teekle>> getTeeklesByUserId(String userId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collectionName)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => Teekle.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      throw Exception('사용자별 Teekle 목록 조회 실패: $e');
     }
   }
 
@@ -193,16 +210,27 @@ class TeekleRepository {
   }
 
   /// 랜덤 티클 후보 목록 조회
-  Future<List<Teekle>> getRandomTeekleCandidates() async {
+  Future<List<Task>> getRandomTaskCandidates() async {
     try {
-      final querySnapshot =
-      await _firestore.collection(_randomCollectionName).get();
+      final querySnapshot = await _firestore
+          .collection('random_teekle_candidates')
+          .limit(50)
+          .get();
 
       return querySnapshot.docs
-          .map((doc) => Teekle.fromMap(doc.data()))
+          .where((doc) => doc.data().isNotEmpty)
+          .map((doc) {
+        try {
+          return Task.fromMap(doc.data());
+        } catch (e) {
+          print('⚠️ Task 파싱 오류: ${doc.data()} - $e');
+          return null;
+        }
+      })
+          .whereType<Task>()
           .toList();
     } catch (e) {
-      throw Exception('랜덤 Teekle 후보 조회 실패: $e');
+      throw Exception('랜덤 Task 후보 조회 실패: $e');
     }
   }
 }
