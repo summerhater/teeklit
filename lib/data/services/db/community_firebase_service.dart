@@ -12,7 +12,6 @@ class CommunityFirebaseService {
   late final postRef = FirebaseFirestore.instance.collection(posts);
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-
   /// post add 게시글 추가
   Future<void> addPost(Posts post) async {
     await postRef.add(post.toJson());

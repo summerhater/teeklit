@@ -57,7 +57,7 @@ class _CommunityPostWritePageState extends State<CommunityPostWritePage> {
       final postContents = _contentsController.text;
 
       context.read<CommunityViewModel>().addPost(postTitle, postContents, category, _images);
-      
+
       context.go('/community');
     }
   }

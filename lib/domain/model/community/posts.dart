@@ -27,7 +27,7 @@ class Posts {
   final String userId; // 게시글 작성자 UID
   final List<Comments>? comment; // 댓글
   final int commentsCount; // 댓글 개수
-  
+
   final bool isHided = false;
 
   Posts({
