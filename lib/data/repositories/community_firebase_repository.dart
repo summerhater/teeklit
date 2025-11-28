@@ -28,12 +28,12 @@ class CommunityFirebaseRepository {
     );
 
     return (
-      snapshot.docs
-          .map((doc) => Posts.fromJson(doc))
-          .where((post) => !blockedUserList.contains(post.userId))
-          .toList(),
-      lastDoc,
-      snapshot.docs.length,
+    snapshot.docs
+        .map((doc) => Posts.fromJson(doc))
+        .where((post) => !blockedUserList.contains(post.userId))
+        .toList(),
+    lastDoc,
+    snapshot.docs.length,
     );
   }
 
@@ -100,5 +100,10 @@ class CommunityFirebaseRepository {
 
   Future<void> deletePost(String postId) async{
     _communityService.deletePost(postId);
+  }
+
+  /// 인기글 가져오기 : 란 임시추가
+  Future<List<Posts>>getTrendingPosts() async {
+    return _communityService.popularPosts();
   }
 }

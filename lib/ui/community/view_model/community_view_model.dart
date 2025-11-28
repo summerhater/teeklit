@@ -32,6 +32,7 @@ class CommunityViewModel extends ChangeNotifier {
   bool likeButtonIsSelected = false;
 
   List<String> blockUserList = [];
+  List<Posts> trendingPostList = [];
 
   int setPostcount = 20;
   bool hasMore = true;
@@ -337,4 +338,36 @@ class CommunityViewModel extends ChangeNotifier {
     mainCategory = category;
     await firstLoadPosts();
   }
+
+  /// 댓글 5개 이상인 게시글 리스트 가져오기 : 란 임시추가
+  Future<List<TrendingPostWithCommentCount>> getTrendingPostList() async {
+    trendingPostList = await _repo.getTrendingPosts();
+    print('✓ 인기 게시글 조회 완료: ${trendingPostList.length}개');
+    notifyListeners();
+
+    /// 각 게시글의 댓글 개수를 조회
+    final trendingPostWithCommentCountList = await Future.wait(
+      trendingPostList.map((post) async {
+        final commentCount = await responseCommentCount(post.postId!);
+        return TrendingPostWithCommentCount(
+          post: post,
+          commentCount: commentCount,
+        );
+      }),
+    );
+    print('=== 최종 반환: ${trendingPostWithCommentCountList.length}개 ===');
+    return trendingPostWithCommentCountList;
+  }
+}
+
+
+
+class TrendingPostWithCommentCount {
+  final Posts post;
+  final int commentCount;
+
+  TrendingPostWithCommentCount({
+    required this.post,
+    required this.commentCount,
+  });
 }
