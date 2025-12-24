@@ -47,7 +47,8 @@ N개의 Teekle 인스턴스를 생성할 때, 만약 개별 단건 쓰기(`add()
 Firestore에서 원자적 쓰기 작업을 보장하는 `runTransaction`과 `WriteBatch` 중, 프로젝트의 특성을 고려해 `WriteBatch`를 채택했습니다.
 
 ### 2.1. WriteBatch vs Transaction 비교 분석
-![batch_vs_transaction](https://github.com/user-attachments/assets/1a3f0c81-6d63-432c-a808-ce3e12158f7a)
+<img width="796" height="521" alt="스크린샷 2025-12-24 오후 3 38 21" src="https://github.com/user-attachments/assets/bfe15d82-aa4d-41ff-8c80-00c4c047d438" />
+
 
 
 | **특징** | **WriteBatch** | **Transaction** |
