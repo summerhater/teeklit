@@ -91,10 +91,8 @@ Teeklit은 안정적인 서비스 제공과 효율적인 데이터 관리를 위
 
 ## 6. 개발 문서
 
-### 📂 View Model에서의 Mixin 사용
-**Architecture Design: MVVM 최적화 & Logic Separation**
-[📂 View Model에서의 Mixin 사용](docs/use_of_mixin_in_VM.md) - Architecture Design: MVVM 최적화 & Logic Separation
-[📂 View Model에서의 Mixin 사용](docs/use_of_firestore_batch.md) - DB Persistence: Firestore WriteBatch의 전략적 채택
+1. [📂 View Model에서의 Mixin 사용](docs/use_of_mixin_in_VM.md) - Architecture Design: MVVM 최적화 & Logic Separation <br>
+2. [📂 View Model에서의 Mixin 사용](docs/use_of_firestore_batch.md) - DB Persistence: Firestore WriteBatch의 전략적 채택
 
 ---
 
